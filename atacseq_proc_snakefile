@@ -1,7 +1,4 @@
 import glob
-import pandas
-import os
-
 
 # Config file
 configfile: "config.yml"

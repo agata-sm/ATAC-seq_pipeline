@@ -13,6 +13,8 @@ resdir= config["resdir"]
 
 filtbamdir = resdir + "bam_filtered/"
 
+
+logdir = config["logdir"]
 rawbamdirstats= logdir + "bam_raw_stats/"
 filtbamdirstats= logdir + "bam_filt_stats/"
 
@@ -26,8 +28,6 @@ deeptoolsdir = resdir + "deepTools/"
 covdir1x = deeptoolsdir + "coverage1x/"
 hmdir = deeptoolsdir + "heatmaps_clust/"
 
-
-logdir = config["logdir"]
 
 tmpdir= os.getenv('TMPDIR', default='/tmp')
 

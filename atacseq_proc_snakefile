@@ -64,7 +64,7 @@ rule filter_bam:
         log_st_idxstats= rawbamdirstats + "{id}.raw.idxstats",
         log_st_stats= rawbamdirstats + "{id}.raw.stats",
         log_picard= logdir + "{id}.MarkDuplicates.metrics.txt",
-        log_Mt= logdir + "{id}.filt.Mt.log"
+        log_Mt= logdir + "{id}.filt.Mt.log",
         log_blcklst= logdir + "{id}.filt.blacklist.log"
     shell:
         """

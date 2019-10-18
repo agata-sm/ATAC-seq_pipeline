@@ -49,7 +49,7 @@ rule all:
     input:
         resdir + "rulegraph.png",
         resdir + "dag.png",
-        resdir + expand(filtbamdirstats + "{id}.filt.stats", id=bam_base)
+        expand(filtbamdirstats + "{id}.filt.stats", id=bam_base)
 
 
 rule filter_bam:

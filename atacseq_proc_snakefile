@@ -38,6 +38,8 @@ tempdir= resdir + "temporary/"
 bam_base = glob.glob(datadir + "*.bam")                  
 bam_base = [s.replace('.bam', '') for s in bam_base]
 
+print(bam_base)
+
 
 #####################
 ## TMPDIR

@@ -8,3 +8,6 @@ __default__:
 filter_bam:
   time: "1:00:00"
   jobname: "filter_bam"
+
+generate_rulegraph:
+  time: "00:10:00"

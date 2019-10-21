@@ -89,7 +89,7 @@ rule filter_bam:
 
         java -Xmx6G -jar $PICARD_HOME/picard.jar MarkDuplicates I=$TMPDIR/{wildcards.id}.sorted.q.bam O=$TMPDIR/{wildcards.id}.dedup.bam \
             M={output.log_picard} VALIDATION_STRINGENCY=LENIENT REMOVE_DUPLICATES=false \
-            ASSUME_SORTED=true METRICS_FILE={wildcards.id}.MarkDuplicates.metrics.txt TMP_DIR=$TMPDIR
+            ASSUME_SORTED=true TMP_DIR=$TMPDIR
         
         # rm mt and blacklist
         samtools index $TMPDIR/{wildcards.id}.dedup.bam
@@ -106,7 +106,7 @@ rule filter_bam:
         cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam.bai {output.nonduprm}
         
         # rm dups
-        samtools view -F 1024 - $TMPDIR/{wildcards.id}.filt_blcklist.bam | sort -T $TMPDIR/{wildcards.id}.sort.tmp -hbo {output.filt} -
+        samtools view -F 1024 - $TMPDIR/{wildcards.id}.filt_blcklist.bam | samtools sort -T $TMPDIR/{wildcards.id}.sort.tmp -hbo {output.filt} -
     
         samtools index {output.filt}
         """

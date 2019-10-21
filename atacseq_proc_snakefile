@@ -71,6 +71,8 @@ rule filter_bam:
         nonduprm= temporary(filtbamdir_dup +  "{id}.filt.NOduprm.bam")
     shell:
         """
+        module unload python
+
         module load bioinfo-tools
         module load samtools/1.9
         module load picard/2.20.4

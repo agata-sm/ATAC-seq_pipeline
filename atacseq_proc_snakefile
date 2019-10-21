@@ -12,6 +12,7 @@ datadir = config["datadir"]
 resdir= config["resdir"]
 
 filtbamdir = resdir + "bam_filtered/"
+filtbamdir_dup = resdir + "bam_filtered_noDupRm/"
 
 
 logdir = config["logdir"]
@@ -27,14 +28,14 @@ corrdir = qcdir + "deepTools_correlationHM/"
 deeptoolsdir = resdir + "deepTools/"
 covdir1x = deeptoolsdir + "coverage1x/"
 hmdir = deeptoolsdir + "heatmaps_clust/"
-
+multiBamSummarydir= deeptoolsdir + "multiBamSummary/"
 
 tmpdir= os.getenv('TMPDIR', default='/tmp')
 
 tempdir= resdir + "temporary/"
 
 # Get samples & file bases in the fastq data directory
-bam_base = glob.glob(datadir + "*[0-9].bam")                  
+bam_base = glob.glob(datadir + "*.bam")                  
 bam_base = [s.replace('.bam', '') for s in bam_base]
 
 
@@ -62,7 +63,8 @@ rule filter_bam:
         log_st_stats= rawbamdirstats + "{id}.raw.stats",
         log_picard= logdir + "{id}.MarkDuplicates.metrics.txt",
         log_Mt= logdir + "{id}.filt.Mt.log",
-        log_blcklst= logdir + "{id}.filt.blacklist.log"
+        log_blcklst= logdir + "{id}.filt.blacklist.log",
+        nonduprm= temporary(filtbamdir_dup +  "{id}.filt.NOduprm.bam")
     shell:
         """
         module load bioinfo-tools
@@ -80,7 +82,7 @@ rule filter_bam:
         samtools idxstats $TMPDIR/{wildcards.id}.sorted.bam > {output.log_st_idxstats}
         samtools stats $TMPDIR/{wildcards.id}.sorted.bam > {output.log_st_stats}
     
-        samtools view -q 1 -hbo $TMPDIR/{wildcards.id}.sorted.q.bam   $TMPDIR/{wildcards.id}.sorted.bam
+        samtools view -q 1 -hbo $TMPDIR/{wildcards.id}.sorted.q.bam $TMPDIR/{wildcards.id}.sorted.bam
 
         java -Xmx6G -jar $PICARD_HOME/picard.jar MarkDuplicates I=$TMPDIR/{wildcards.id}.sorted.q.bam O=$TMPDIR/{wildcards.id}.dedup.bam \
             M={output.log_picard} VALIDATION_STRINGENCY=LENIENT REMOVE_DUPLICATES=false \
@@ -90,6 +92,8 @@ rule filter_bam:
 
         bamutils filter $TMPDIR/{wildcards.id}.filt_M.bam $TMPDIR/{wildcards.id}.filt_blcklist.bam -excludebed {config[blacklist]} nostrand 2>&1 | tee -a {output.log_blcklst}
         
+        cp $TMPDIR/{wildcards.id}.filt_blcklist.bam {output.nonduprm}
+
         samtools view -F 1024 - $TMPDIR/{wildcards.id}.filt_blcklist.bam | sort -T $TMPDIR/{wildcards.id}.sort.tmp -hbo {output.filt} -
     
         samtools index {output.filt}

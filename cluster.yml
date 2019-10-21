@@ -1,10 +1,10 @@
 __default__:
   account: "snic2019-8-257"
-  partition: "core"
+  partition: "devel"
   N: 1
   time: "01:00:00"
   jobname: "atacseq"
  
 filter_bam:
-  time: "3:00:00"
+  time: "1:00:00"
   jobname: "filter_bam"

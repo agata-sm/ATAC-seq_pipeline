@@ -37,6 +37,8 @@ tempdir= resdir + "temporary/"
 # Get samples & file bases in the fastq data directory
 bam_base = glob.glob(datadir + "*.bam")                  
 bam_base = [s.replace('.bam', '') for s in bam_base]
+bam_base = [s.replace(datadir, '') for s in bam_base]
+
 
 print(bam_base)
 

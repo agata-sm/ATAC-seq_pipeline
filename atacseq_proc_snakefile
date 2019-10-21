@@ -87,19 +87,20 @@ rule filter_bam:
     
         samtools view -q 1 -hbo $TMPDIR/{wildcards.id}.sorted.q.bam $TMPDIR/{wildcards.id}.sorted.bam
 
-        java -Xmx6G -jar $PICARD_HOME/picard.jar MarkDuplicates I=$TMPDIR/{wildcards.id}.sorted.q.bam O=$TMPDIR/{wildcards.id}.dedup.bam \
-            M={output.log_picard} VALIDATION_STRINGENCY=LENIENT REMOVE_DUPLICATES=false \
-            ASSUME_SORTED=true TMP_DIR=$TMPDIR
+        java -Xmx6G -jar $PICARD_HOME/picard.jar MarkDuplicates -I $TMPDIR/{wildcards.id}.sorted.q.bam \
+            -O $TMPDIR/{wildcards.id}.dedup.bam \
+            -M {output.log_picard} -VALIDATION_STRINGENCY LENIENT -REMOVE_DUPLICATES false \
+            -ASSUME_SORTED true -TMP_DIR $TMPDIR
         
         # rm mt and blacklist
         samtools index $TMPDIR/{wildcards.id}.dedup.bam
         samtools view -b -L {config[mt]} -U $TMPDIR/{wildcards.id}.filtMT.bam -o $TMPDIR/{wildcards.id}.filtMT.in.bam $TMPDIR/{wildcards.id}.dedup.bam
         samtools index $TMPDIR/{wildcards.id}.filtMT.bam
-        samtools flagstats $TMPDIR/{wildcards.id}.filtMT.in.bam > {output.log_Mt}
+        samtools flagstat $TMPDIR/{wildcards.id}.filtMT.in.bam > {output.log_Mt}
         
         samtools view -b -L {config[blacklist]} -U $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam -o $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam $TMPDIR/{wildcards.id}.filtMT.bam
         samtools index $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam
-        samtools flagstats $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam > {output.log_blcklst}
+        samtools flagstat $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam > {output.log_blcklst}
 
     
         cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam {output.nonduprm}

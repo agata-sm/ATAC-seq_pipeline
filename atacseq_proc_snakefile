@@ -30,7 +30,7 @@ covdir1x = deeptoolsdir + "coverage1x/"
 hmdir = deeptoolsdir + "heatmaps_clust/"
 
 multiBamSummarydir= deeptoolsdir + "multiBamSummary/"
-multiBamSummarydir_bin5k + "multiBamSum_bin_5k"
+multiBamSummarydir_bin5k= multiBamSummarydir + "multiBamSum_bin_5k"
 
 
 tmpdir= os.getenv('TMPDIR', default='/tmp')

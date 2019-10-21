@@ -61,7 +61,7 @@ rule filter_bam:
     input:
         datadir + "{id}.bam"
     output:
-        filt= filtbamdir + "{id}.filt.bam",
+        filt= filtbamdir + "{id}.filtAll.bam",
         log_st_flagstat= rawbamdirstats + "{id}.raw.flagstat",
         log_st_idxstats= rawbamdirstats + "{id}.raw.idxstats",
         log_st_stats= rawbamdirstats + "{id}.raw.stats",
@@ -106,11 +106,11 @@ rule filter_bam:
         samtools flagstat $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam > {output.log_blcklst}
 
     
-        cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam {output.nonduprm}
-        cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam.bai {output.nonduprm}
+        cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam {output.nonduprm}
+        cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam.bai {output.nonduprm}
         
         # rm dups
-        samtools view -F 1024 - $TMPDIR/{wildcards.id}.filt_blcklist.bam | samtools sort -T $TMPDIR/{wildcards.id}.sort.tmp -hbo {output.filt} -
+        samtools view -F 1024 - $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam | samtools sort -T $TMPDIR/{wildcards.id}.sort.tmp -hbo {output.filt} -
     
         samtools index {output.filt}
         """

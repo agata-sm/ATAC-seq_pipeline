@@ -57,7 +57,8 @@ rule all:
     input:
         resdir + "rulegraph.png",
         resdir + "dag.png",
-        expand(filtbamdirstats + "{id}.filt.stats", id=bam_base)
+        expand(filtbamdirstats + "{id}.filt.stats", id=bam_base),
+        multiBamSummarydir_bin5k + "multiBamSum_bin_5k.npz"
 
 
 rule filter_bam:

@@ -61,7 +61,7 @@ rule filter_bam:
     input:
         datadir + "{id}.bam"
     output:
-        filt= filtbamdir + "{id}.filtAll.bam",
+        filt= filtbamdir + "{id}.filt.bam",
         log_st_flagstat= rawbamdirstats + "{id}.raw.flagstat",
         log_st_idxstats= rawbamdirstats + "{id}.raw.idxstats",
         log_st_stats= rawbamdirstats + "{id}.raw.stats",

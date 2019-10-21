@@ -163,6 +163,7 @@ rule xcor:
     shell:
         """
         module load bioinfo-tools
+        module unload gcc
         module load phantompeakqualtools/1.1
 
         run_spp.R -c={input} -savp={output.plot} -out={output.met}

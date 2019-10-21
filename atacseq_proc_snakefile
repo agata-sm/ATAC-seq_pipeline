@@ -58,7 +58,8 @@ rule all:
         resdir + "rulegraph.png",
         resdir + "dag.png",
         expand(filtbamdirstats + "{id}.filt.stats", id=bam_base),
-        multiBamSummarydir_bin5k + "multiBamSum_bin_5k.npz"
+        multiBamSummarydir_bin5k + "multiBamSum_bin_5k.npz",
+        xcordir + "xcor.metrics.txt"
 
 
 rule filter_bam:
@@ -157,7 +158,7 @@ rule xcor:
         filtbamdir_dup +  "{id}.filt.NOduprm.bam"
     output:
         plot= xcordir + "{id}.xcor.pdf",
-        met= xcordir + "{id}.xcor.metrics.txt"
+        met= xcordir + "xcor.metrics.txt"
     shell:
         """
         module load bioinfo-tools

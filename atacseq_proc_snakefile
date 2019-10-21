@@ -87,10 +87,13 @@ rule filter_bam:
     
         samtools view -q 1 -hbo $TMPDIR/{wildcards.id}.sorted.q.bam $TMPDIR/{wildcards.id}.sorted.bam
 
-        java -Xmx6G -jar $PICARD_HOME/picard.jar MarkDuplicates -I $TMPDIR/{wildcards.id}.sorted.q.bam \
-            -O $TMPDIR/{wildcards.id}.dedup.bam \
-            -M {output.log_picard} -VALIDATION_STRINGENCY LENIENT -REMOVE_DUPLICATES false \
-            -ASSUME_SORTED true -TMP_DIR $TMPDIR
+
+        java -Xmx6G -jar $PICARD_HOME/picard.jar MarkDuplicates I=$TMPDIR/{wildcards.id}.sorted.q.bam \
+            O=$TMPDIR/{wildcards.id}.dedup.bam \
+            M={output.log_picard} VALIDATION_STRINGENCY=LENIENT REMOVE_DUPLICATES=false \
+            ASSUME_SORTED=true TMP_DIR=$TMPDIR
+
+
         
         # rm mt and blacklist
         samtools index $TMPDIR/{wildcards.id}.dedup.bam

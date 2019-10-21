@@ -11,3 +11,8 @@ snkpth: "/proj/uppstore2019111/nobackup/private/nbis4833/tst/pipeline/ATAC-seq_p
 # annotation
 blacklist: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/blacklist/ENCFF547MET.ens.bed"
 mt: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/blacklist/mt.bed"
+
+# genome size and fragment size
+effGenomeSize: "2308125349"
+extSize: "300"
+

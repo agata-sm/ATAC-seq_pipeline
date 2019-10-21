@@ -28,7 +28,10 @@ corrdir = qcdir + "deepTools_correlationHM/"
 deeptoolsdir = resdir + "deepTools/"
 covdir1x = deeptoolsdir + "coverage1x/"
 hmdir = deeptoolsdir + "heatmaps_clust/"
+
 multiBamSummarydir= deeptoolsdir + "multiBamSummary/"
+multiBamSummarydir_bin5k + "multiBamSum_bin_5k"
+
 
 tmpdir= os.getenv('TMPDIR', default='/tmp')
 
@@ -146,6 +149,33 @@ rule bam_stats:
         samtools flagstat {input} > {output.log_st_flagstat}
         samtools idxstats {input} > {output.log_st_idxstats}
         samtools stats {input} > {output.log_st_stats}
+        """
+
+rule xcor:
+    input:
+        filtbamdir_dup +  "{id}.filt.NOduprm.bam"
+    output:
+        plot= xcordir + "{id}.xcor.pdf",
+        met= xcordir + "{id}.xcor.metrics.txt"
+    shell:
+        """
+        module load bioinfo-tools
+        module load phantompeakqualtools/1.1
+
+        run_spp.R -c={input} -savp={output.plot} -out={output.met}
+        """
+
+rule multiBam_Summary:
+    input:
+        expand(filtbamdir + "{id}.filt.bam", id=bam_base)
+    output:
+        multiBamSummarydir_bin5k + "multiBamSum_bin_5k.npz"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        multiBamSummary bins --bamfiles {input} --outFileName {output} --binSize=5000 --numberOfProcessors=3 --extendReads={config[extSize]}
         """
 
 

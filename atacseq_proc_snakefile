@@ -40,7 +40,7 @@ bam_base = [s.replace('.bam', '') for s in bam_base]
 bam_base = [s.replace(datadir, '') for s in bam_base]
 
 
-print(bam_base)
+#print(bam_base)
 
 
 #####################

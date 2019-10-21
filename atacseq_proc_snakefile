@@ -71,12 +71,9 @@ rule filter_bam:
         nonduprm= temporary(filtbamdir_dup +  "{id}.filt.NOduprm.bam")
     shell:
         """
-        module unload python
-
         module load bioinfo-tools
         module load samtools/1.9
         module load picard/2.20.4
-        module load NGSUtils/0.5.9
         
         TMPDIR="${{TMPDIR:-/tmp}}"
         PICARD_HOME="${{PICARD_HOME}}"
@@ -93,17 +90,25 @@ rule filter_bam:
         java -Xmx6G -jar $PICARD_HOME/picard.jar MarkDuplicates I=$TMPDIR/{wildcards.id}.sorted.q.bam O=$TMPDIR/{wildcards.id}.dedup.bam \
             M={output.log_picard} VALIDATION_STRINGENCY=LENIENT REMOVE_DUPLICATES=false \
             ASSUME_SORTED=true METRICS_FILE={wildcards.id}.MarkDuplicates.metrics.txt TMP_DIR=$TMPDIR
-
-        bamutils filter $TMPDIR/{wildcards.id}.dedup.bam $TMPDIR/{wildcards.id}.filt_M.bam -excluderef M 2>&1 | tee -a {output.log_Mt}
-
-        bamutils filter $TMPDIR/{wildcards.id}.filt_M.bam $TMPDIR/{wildcards.id}.filt_blcklist.bam -excludebed {config[blacklist]} nostrand 2>&1 | tee -a {output.log_blcklst}
         
-        cp $TMPDIR/{wildcards.id}.filt_blcklist.bam {output.nonduprm}
+        # rm mt and blacklist
+        samtools index $TMPDIR/{wildcards.id}.dedup.bam
+        samtools view -b -L {config[mt]} -U $TMPDIR/{wildcards.id}.filtMT.bam -o $TMPDIR/{wildcards.id}.filtMT.in.bam $TMPDIR/{wildcards.id}.dedup.bam
+        samtools index $TMPDIR/{wildcards.id}.filtMT.bam
+        samtools flagstats $TMPDIR/{wildcards.id}.filtMT.in.bam > {output.log_Mt}
+        
+        samtools view -b -L {config[blacklist]} -U $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam -o $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam $TMPDIR/{wildcards.id}.filtMT.bam
+        samtools index $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam
+        samtools flagstats $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam > {output.log_blcklst}
 
+    
+        cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam {output.nonduprm}
+        cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam.bai {output.nonduprm}
+        
+        # rm dups
         samtools view -F 1024 - $TMPDIR/{wildcards.id}.filt_blcklist.bam | sort -T $TMPDIR/{wildcards.id}.sort.tmp -hbo {output.filt} -
     
         samtools index {output.filt}
-
         """
 
 rule bam_stats:

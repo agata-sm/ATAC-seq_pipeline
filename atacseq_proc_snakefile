@@ -68,7 +68,8 @@ rule filter_bam:
         log_picard= logdir + "{id}.MarkDuplicates.metrics.txt",
         log_Mt= logdir + "{id}.filt.Mt.log",
         log_blcklst= logdir + "{id}.filt.blacklist.log",
-        nonduprm= temporary(filtbamdir_dup +  "{id}.filt.NOduprm.bam")
+        nonduprm= filtbamdir_dup +  "{id}.filt.NOduprm.bam"
+        nonduprm_idx= filtbamdir_dup +  "{id}.filt.NOduprm.bam.bai"
     shell:
         """
         module load bioinfo-tools
@@ -99,15 +100,17 @@ rule filter_bam:
         samtools index $TMPDIR/{wildcards.id}.dedup.bam
         samtools view -b -L {config[mt]} -U $TMPDIR/{wildcards.id}.filtMT.bam -o $TMPDIR/{wildcards.id}.filtMT.in.bam $TMPDIR/{wildcards.id}.dedup.bam
         samtools index $TMPDIR/{wildcards.id}.filtMT.bam
+        samtools index $TMPDIR/{wildcards.id}.filtMT.in.bam
         samtools flagstat $TMPDIR/{wildcards.id}.filtMT.in.bam > {output.log_Mt}
         
         samtools view -b -L {config[blacklist]} -U $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam -o $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam $TMPDIR/{wildcards.id}.filtMT.bam
         samtools index $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam
+        samtools index $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam
         samtools flagstat $TMPDIR/{wildcards.id}.filt_Mt_blcklist.in.bam > {output.log_blcklst}
 
     
         cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam {output.nonduprm}
-        cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam.bai {output.nonduprm}
+        cp $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam.bai {output.nonduprm_idx}
         
         # rm dups
         samtools view -F 1024 - $TMPDIR/{wildcards.id}.filt_Mt_blcklist.bam | samtools sort -T $TMPDIR/{wildcards.id}.sort.tmp -o {output.filt} -

@@ -13,6 +13,6 @@ blacklist: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/blacklist
 mt: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/blacklist/mt.bed"
 
 # genome size and fragment size
-effGenomeSize: "2308125349"
+efGenomeSize: "2308125349"
 extSize: "300"
 

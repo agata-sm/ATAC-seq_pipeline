@@ -28,9 +28,9 @@ corrdir = qcdir + "deepTools_correlationHM/"
 deeptoolsdir = resdir + "deepTools/"
 covdir1x = deeptoolsdir + "coverage1x/"
 hmdir = deeptoolsdir + "heatmaps_clust/"
+deeptoolsdir_plots= deeptoolsdir + "plots/"
 
 multiBamSummarydir= deeptoolsdir + "multiBamSummary/"
-multiBamSummarydir_bin5k= multiBamSummarydir + "multiBamSum_bin_5k"
 
 
 tmpdir= os.getenv('TMPDIR', default='/tmp')
@@ -58,8 +58,10 @@ rule all:
         resdir + "rulegraph.png",
         resdir + "dag.png",
         expand(filtbamdirstats + "{id}.filt.stats", id=bam_base),
-        multiBamSummarydir_bin5k + "multiBamSum_bin_5k.npz",
-        expand(xcordir + "{id}.xcor.metrics.txt", id=bam_base)
+        expand(xcordir + "{id}.xcor.metrics.txt", id=bam_base),
+        deeptoolsdir_plots + "CorrSpearman_bin5k.pdf",
+        deeptoolsdir_plots + "bamFingerprint.pdf",
+        expand(covdir1x + "{id}.norm1x.bw", id=bam_base)    
 
 
 
@@ -169,11 +171,11 @@ rule xcor:
         run_spp.R -c={input} -savp={output.plot} -out={output.met}
         """
 
-rule multiBam_Summary:
+rule multiBamSummary:
     input:
         expand(filtbamdir + "{id}.filt.bam", id=bam_base)
     output:
-        multiBamSummarydir_bin5k + "multiBamSum_bin_5k.npz"
+        multiBamSummarydir + "multiBamSum_bin_5k.npz"
     shell:
         """
         module load bioinfo-tools
@@ -181,6 +183,50 @@ rule multiBam_Summary:
 
         multiBamSummary bins --bamfiles {input} --outFileName {output} --binSize=5000 --numberOfProcessors=3 --extendReads={config[extSize]}
         """
+
+rule plotCorrelation:
+    input:
+        multiBamSummarydir + "multiBamSum_bin_5k.npz"
+    output:
+        deeptoolsdir_plots + "CorrSpearman_bin5k.pdf"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        plotCorrelation --corData {input} --corMethod spearman --whatToPlot heatmap --plotFile {output} \
+            --skipZeros --plotFileFormat pdf --plotNumbers
+        """
+rule plotFingerprint:
+    input:
+        expand(filtbamdir + "{id}.filt.bam", id=bam_base)   
+    output:
+        deeptoolsdir_plots + "bamFingerprint.pdf"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        plotFingerprint --bamfiles {input} --extendReads {config[extSize]} --binSize=1000 --plotFile {output} --numberOfProcessors=1
+        """
+
+rule bamCoverage:
+    input:
+        filtbamdir + "{id}.filt.bam"
+    output:
+         bw= covdir1x + "{id}.norm1x.bw",
+         bg= covdir1x + "{id}.norm1x.bg"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        bamCoverage --bam {input} --outFileName {output.bw} --normalizeTo1x {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization Y
+
+        bamCoverage --bam {input} --outFileName {output.bg} --normalizeTo1x {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization Y
+        """
+
+
 
 
 ################################

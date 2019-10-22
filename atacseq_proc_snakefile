@@ -216,7 +216,7 @@ rule bamCoverage:
         filtbamdir + "{id}.filt.bam"
     output:
          bw1x= covdir1x + "{id}.norm1x.bw",
-         bg1x= covdir1x + "{id}.norm1x.bg"
+         bg1x= covdir1x + "{id}.norm1x.bg",
          bwCPM= covdirCPM + "{id}.normCPM.bw",
          bgCPM= covdirCPM + "{id}.normCPM.bg"
     shell:

@@ -221,9 +221,9 @@ rule bamCoverage:
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        bamCoverage --bam {input} --outFileName {output.bw} --normalizeTo1x {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization Y
+        bamCoverage --bam {input} --outFileName {output.bw} --normalizeTo1x --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization Y
 
-        bamCoverage --bam {input} --outFileName {output.bg} --normalizeTo1x {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization Y
+        bamCoverage --bam {input} --outFileName {output.bg} --normalizeTo1x --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization Y
         """
 
 

@@ -27,6 +27,7 @@ corrdir = qcdir + "deepTools_correlationHM/"
 
 deeptoolsdir = resdir + "deepTools/"
 covdir1x = deeptoolsdir + "coverage1x/"
+covdirCPM = deeptoolsdir + "coverageCPM/"
 hmdir = deeptoolsdir + "heatmaps_clust/"
 deeptoolsdir_plots= deeptoolsdir + "plots/"
 
@@ -214,16 +215,24 @@ rule bamCoverage:
     input:
         filtbamdir + "{id}.filt.bam"
     output:
-         bw= covdir1x + "{id}.norm1x.bw",
-         bg= covdir1x + "{id}.norm1x.bg"
+         bw1x= covdir1x + "{id}.norm1x.bw",
+         bg1x= covdir1x + "{id}.norm1x.bg"
+         bwCPM= covdirCPM + "{id}.normCPM.bw",
+         bgCPM= covdirCPM + "{id}.normCPM.bg"
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        bamCoverage --bam {input} --outFileName {output.bw} --normalizeTo1x --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization Y
+        bamCoverage --bam {input} --outFileName {output.bw1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization Y
 
-        bamCoverage --bam {input} --outFileName {output.bg} --normalizeTo1x --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization Y
+        bamCoverage --bam {input} --outFileName {output.bg1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization Y
+
+
+        bamCoverage --bam {input} --outFileName {output.bwCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization Y
+
+        bamCoverage --bam {input} --outFileName {output.bgCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization Y
+
         """
 
 

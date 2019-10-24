@@ -244,7 +244,7 @@ rule computeMatrix:
     input:
         expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
     output:
-        ens_genes= matrixDir + "ensGene.cov1x.computeMatrix.gz",
+        ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz",
         all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
         trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
     shell:
@@ -262,11 +262,11 @@ rule computeMatrix:
 
 rule plotHeatmap:
     input:
-        ens_genes= matrixDir + "ensGene.cov1x.computeMatrix.gz",
+        ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz",
         all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
         trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
     output:
-        ens_genes= hmDir + "ensGene.cov1x.pdf",
+        ens_gene= hmDir + "ensGene.cov1x.pdf",
         all_TSS= hmDir + "refTSS.cov1x.pdf",
         trx_TSS= hmDir + "refTSStrx.cov1x.pdf"
     shell:

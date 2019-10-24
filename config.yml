@@ -14,7 +14,7 @@ mt: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/blacklist/mt.bed
 
 #gene and TSS annotation for heatmap plotting
 allTSS: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/refTSS_ALLcenterpoint.bed"
-geneTSS: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/refTSS_geneid.bed"
+trxTSS: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/refTSS_geneid.bed"
 ens5gene: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/ens_5gene.bed"
 
 # genome size and fragment size

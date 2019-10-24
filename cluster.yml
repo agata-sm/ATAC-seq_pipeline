@@ -16,3 +16,8 @@ multiBamSummary:
   time: "01:00:00"
   jobname: "multiBamSummary"
   N: 1
+
+computeMatrix:
+  time: "01:00:00"
+  jobname: "computeMatrix"
+  N: 1

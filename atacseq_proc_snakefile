@@ -33,6 +33,9 @@ deeptoolsdir_plots= deeptoolsdir + "plots/"
 
 multiBamSummarydir= deeptoolsdir + "multiBamSummary/"
 
+matrixDir= deeptoolsdir + "profiles/computeMatrix_cov1x/"
+hmDir=deeptoolsdir + "profiles/heatmaps/"
+
 
 tmpdir= os.getenv('TMPDIR', default='/tmp')
 
@@ -62,7 +65,8 @@ rule all:
         expand(xcordir + "{id}.xcor.metrics.txt", id=bam_base),
         deeptoolsdir_plots + "CorrSpearman_bin5k.pdf",
         deeptoolsdir_plots + "bamFingerprint.pdf",
-        expand(covdir1x + "{id}.norm1x.bw", id=bam_base)    
+        expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
+        hmDir + "ensGene.cov1x.pdf"
 
 
 
@@ -200,7 +204,7 @@ rule plotCorrelation:
         """
 rule plotFingerprint:
     input:
-        expand(filtbamdir + "{id}.filt.bam", id=bam_base)   
+        expand(filtbamdir + "{id}.filt.bam", id=bam_base)
     output:
         deeptoolsdir_plots + "bamFingerprint.pdf"
     shell:
@@ -234,6 +238,50 @@ rule bamCoverage:
         bamCoverage --bam {input} --outFileName {output.bgCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization Y
 
         """
+
+
+rule computeMatrix:
+    input:
+        expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
+    output:
+        ens_genes= matrixDir + "ensGene.cov1x.computeMatrix.gz",
+        all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
+        trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p 2 -S {input} -R {config[ens5gene]} -o {output.ens_gene}
+
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p 2 -S {input} -R {config[allTSS]} -o {output.all_TSS}
+
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p 2 -S {input} -R {config[trxTSS]} -o {output.trx_TSS}
+
+        """
+
+rule plotHeatmap:
+    input:
+        ens_genes= matrixDir + "ensGene.cov1x.computeMatrix.gz",
+        all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
+        trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
+    output:
+        ens_genes= hmDir + "ensGene.cov1x.pdf",
+        all_TSS= hmDir + "refTSS.cov1x.pdf",
+        trx_TSS= hmDir + "refTSStrx.cov1x.pdf"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+        
+        plotHeatmap --matrixFile {input.ens_gene} --outFileName {output.ens_gene} --kmeans 4
+
+        plotHeatmap --matrixFile {input.all_TSS} --outFileName {output.all_TSS} --kmeans 4
+
+        plotHeatmap --matrixFile {input.trx_TSS} --outFileName {output.trx_TSS} --kmeans 4
+
+        """
+
 
 
 

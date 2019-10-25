@@ -36,8 +36,7 @@ multiBamSummarydir= deeptoolsdir + "multiBamSummary/"
 matrixDir= deeptoolsdir + "profiles/computeMatrix_cov1x/"
 hmDir=deeptoolsdir + "profiles/heatmaps/"
 matrixDirInd= deeptoolsdir + "profiles/computeMatrix_cov1x_samples/"
-hmDirInd=matrixDirInd + "profiles/heatmaps_samples/"
-
+hmDirInd=deeptoolsdir + "profiles/heatmaps_samples/"
 
 tmpdir= os.getenv('TMPDIR', default='/tmp')
 
@@ -69,7 +68,7 @@ rule all:
         deeptoolsdir_plots + "bamFingerprint.pdf",
         expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
         hmDir + "ensGene.cov1x.pdf",
-        expand(matrixDirInd + "{id}.ensGene.cov1x.computeMatrix.gz", id=bam_base)
+        expand(hmDirInd + "{id}.ensGene.cov1x.k3.pdf", id=bam_base)
 
 
 
@@ -325,11 +324,11 @@ rule computeMatrix_samples:
 rule plotHeatmap:
     input:
         ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz",
-        #all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
+        all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
         trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
     output:
         ens_gene= hmDir + "ensGene.cov1x.k4.pdf",
-        #all_TSS= hmDir + "refTSS.cov1x.pdf",
+        all_TSS= hmDir + "refTSS.cov1x.pdf",
         trx_TSS= hmDir + "refTSStrx.cov1x.k4.pdf"
     shell:
         """
@@ -338,7 +337,7 @@ rule plotHeatmap:
         
         plotHeatmap --matrixFile {input.ens_gene} --outFileName {output.ens_gene} --kmeans 4 --sortRegions descend --sortUsing median
 
-        #plotHeatmap --matrixFile {input.all_TSS} --outFileName {output.all_TSS} --kmeans 4
+        plotHeatmap --matrixFile {input.all_TSS} --outFileName {output.all_TSS} --kmeans 4 --sortRegions descend --sortUsing median
 
         plotHeatmap --matrixFile {input.trx_TSS} --outFileName {output.trx_TSS} --kmeans 4 --sortRegions descend --sortUsing median
 

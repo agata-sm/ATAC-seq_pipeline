@@ -17,7 +17,19 @@ multiBamSummary:
   jobname: "multiBamSummary"
   N: 1
 
-computeMatrix:
+computeMatrix_EnsGene:
+  time: "01:00:00"
+  jobname: "computeMatrix"
+  N: 1
+  #partition: "node"
+
+computeMatrix_refTSS:
+  time: "01:00:00"
+  jobname: "computeMatrix"
+  N: 1
+  #partition: "node"
+
+computeMatrix_refTSStrx:
   time: "01:00:00"
   jobname: "computeMatrix"
   N: 1

@@ -67,7 +67,7 @@ rule all:
         deeptoolsdir_plots + "CorrSpearman_bin5k.pdf",
         deeptoolsdir_plots + "bamFingerprint.pdf",
         expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
-        hmDir + "ensGene.cov1x.pdf",
+        hmDir + "ensGene.cov1x.k4.pdf",
         expand(hmDirInd + "{id}.ensGene.cov1x.k3.pdf", id=bam_base)
 
 
@@ -328,7 +328,7 @@ rule plotHeatmap:
         trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
     output:
         ens_gene= hmDir + "ensGene.cov1x.k4.pdf",
-        all_TSS= hmDir + "refTSS.cov1x.pdf",
+        all_TSS= hmDir + "refTSS.cov1x.k4.pdf",
         trx_TSS= hmDir + "refTSStrx.cov1x.k4.pdf"
     shell:
         """

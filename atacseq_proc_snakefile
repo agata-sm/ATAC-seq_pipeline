@@ -35,6 +35,8 @@ multiBamSummarydir= deeptoolsdir + "multiBamSummary/"
 
 matrixDir= deeptoolsdir + "profiles/computeMatrix_cov1x/"
 hmDir=deeptoolsdir + "profiles/heatmaps/"
+matrixDirInd= deeptoolsdir + "profiles/computeMatrix_cov1x_samples/"
+hmDirInd=matrixDirInd + "profiles/heatmaps_samples/"
 
 
 tmpdir= os.getenv('TMPDIR', default='/tmp')
@@ -66,7 +68,8 @@ rule all:
         deeptoolsdir_plots + "CorrSpearman_bin5k.pdf",
         deeptoolsdir_plots + "bamFingerprint.pdf",
         expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
-        hmDir + "ensGene.cov1x.pdf"
+        hmDir + "ensGene.cov1x.pdf",
+        expand(matrixDirInd + "{id}.ensGene.cov1x.computeMatrix.gz", id=bam_base)
 
 
 
@@ -240,50 +243,123 @@ rule bamCoverage:
         """
 
 
-rule computeMatrix:
+rule computeMatrix_EnsGene:
     input:
         expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
     output:
-        ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz",
-        all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
+        ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz"
+        #all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
+        #trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ens5gene]} -o {output.ens_gene}
+
+        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[allTSS]} -o {output.all_TSS}
+
+        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[trxTSS]} -o {output.trx_TSS}
+
+        """
+
+
+rule computeMatrix_refTSS:
+    input:
+        expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
+    output:
+        #ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz",
+        all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz"
+        #trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ens5gene]} -o {output.ens_gene}
+
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[allTSS]} -o {output.all_TSS}
+
+        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[trxTSS]} -o {output.trx_TSS}
+
+        """
+
+rule computeMatrix_refTSStrx:
+    input:
+        expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
+    output:
+        #ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz",
+        #all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz"
         trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p 2 -S {input} -R {config[ens5gene]} -o {output.ens_gene}
+        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ens5gene]} -o {output.ens_gene}
 
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p 2 -S {input} -R {config[allTSS]} -o {output.all_TSS}
+        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[allTSS]} -o {output.all_TSS}
 
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p 2 -S {input} -R {config[trxTSS]} -o {output.trx_TSS}
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[trxTSS]} -o {output.trx_TSS}
 
         """
+
+
+
+rule computeMatrix_samples:
+    input:
+        covdir1x + "{id}.norm1x.bw"
+    output:
+        ens_gene= matrixDirInd + "{id}.ensGene.cov1x.computeMatrix.gz"
+
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ens5gene]} -o {output.ens_gene}
+
+        """
+
 
 rule plotHeatmap:
     input:
         ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz",
-        all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
+        #all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
         trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
     output:
-        ens_gene= hmDir + "ensGene.cov1x.pdf",
-        all_TSS= hmDir + "refTSS.cov1x.pdf",
-        trx_TSS= hmDir + "refTSStrx.cov1x.pdf"
+        ens_gene= hmDir + "ensGene.cov1x.k4.pdf",
+        #all_TSS= hmDir + "refTSS.cov1x.pdf",
+        trx_TSS= hmDir + "refTSStrx.cov1x.k4.pdf"
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
         
-        plotHeatmap --matrixFile {input.ens_gene} --outFileName {output.ens_gene} --kmeans 4
+        plotHeatmap --matrixFile {input.ens_gene} --outFileName {output.ens_gene} --kmeans 4 --sortRegions descend --sortUsing median
 
-        plotHeatmap --matrixFile {input.all_TSS} --outFileName {output.all_TSS} --kmeans 4
+        #plotHeatmap --matrixFile {input.all_TSS} --outFileName {output.all_TSS} --kmeans 4
 
-        plotHeatmap --matrixFile {input.trx_TSS} --outFileName {output.trx_TSS} --kmeans 4
+        plotHeatmap --matrixFile {input.trx_TSS} --outFileName {output.trx_TSS} --kmeans 4 --sortRegions descend --sortUsing median
 
         """
 
 
+rule plotHeatmap_samples:
+    input:
+        matrixDirInd + "{id}.ensGene.cov1x.computeMatrix.gz"
+    output:
+        k3= hmDirInd + "{id}.ensGene.cov1x.k3.pdf",
+        k4= hmDirInd + "{id}.ensGene.cov1x.k4.pdf"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+        
+        plotHeatmap --matrixFile {input} --outFileName {output.k3} --kmeans 3 --sortRegions descend --sortUsing median
+        plotHeatmap --matrixFile {input} --outFileName {output.k4} --kmeans 4 --sortRegions descend --sortUsing median
 
+        """
 
 
 ################################

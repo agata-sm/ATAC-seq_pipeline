@@ -7,7 +7,7 @@ datadir: "/proj/uppstore2019111/private/01-Results/bwa/"
 resdir: "results/"
 logdir: "logdir/"
 # Snakefile location
-snkpth: "/proj/uppstore2019111/nobackup/private/nbis4833/tst/pipeline/ATAC-seq_pipeline/atacseq_proc_snakefile"
+snkpth: "/proj/uppstore2019111/nobackup/private/nbis4833/analysis/processing/ATAC-seq_pipeline/atacseq_proc_snakefile"
 
 # annotation
 blacklist: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/blacklist/ENCFF547MET.ens.bed"

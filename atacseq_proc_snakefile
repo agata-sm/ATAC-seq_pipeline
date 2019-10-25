@@ -247,18 +247,12 @@ rule computeMatrix_EnsGene:
         expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
     output:
         ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz"
-        #all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
-        #trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
 
         computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ens5gene]} -o {output.ens_gene}
-
-        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[allTSS]} -o {output.all_TSS}
-
-        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[trxTSS]} -o {output.trx_TSS}
 
         """
 
@@ -267,37 +261,24 @@ rule computeMatrix_refTSS:
     input:
         expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
     output:
-        #ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz",
         all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz"
-        #trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ens5gene]} -o {output.ens_gene}
-
         computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[allTSS]} -o {output.all_TSS}
-
-        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[trxTSS]} -o {output.trx_TSS}
-
         """
 
 rule computeMatrix_refTSStrx:
     input:
         expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
     output:
-        #ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz",
-        #all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz"
         trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
-
-        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ens5gene]} -o {output.ens_gene}
-
-        #computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[allTSS]} -o {output.all_TSS}
 
         computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[trxTSS]} -o {output.trx_TSS}
 

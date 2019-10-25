@@ -1,5 +1,6 @@
 # Data path
-datadir: "/proj/uppstore2019111/nobackup/private/nbis4833/tst/bam/"
+#datadir: "/proj/uppstore2019111/nobackup/private/nbis4833/tst/bam/"
+datadir: "/proj/uppstore2019111/private/01-Results/bwa/"
 
 
 # Output paths

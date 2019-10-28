@@ -316,11 +316,11 @@ rule plotHeatmap:
         module load bioinfo-tools
         module load deepTools/3.1.0
         
-        plotHeatmap --matrixFile {input.ens_gene} --outFileName {output.ens_gene} --kmeans 4 --sortRegions descend --sortUsing median -p 5
+        plotHeatmap --matrixFile {input.ens_gene} --outFileName {output.ens_gene} --kmeans 4 --sortRegions descend --sortUsing median
 
-        plotHeatmap --matrixFile {input.all_TSS} --outFileName {output.all_TSS} --kmeans 4 --sortRegions descend --sortUsing median -p 5
+        plotHeatmap --matrixFile {input.all_TSS} --outFileName {output.all_TSS} --kmeans 4 --sortRegions descend --sortUsing median
 
-        plotHeatmap --matrixFile {input.trx_TSS} --outFileName {output.trx_TSS} --kmeans 4 --sortRegions descend --sortUsing median -p 5
+        plotHeatmap --matrixFile {input.trx_TSS} --outFileName {output.trx_TSS} --kmeans 4 --sortRegions descend --sortUsing median
 
         """
 
@@ -336,9 +336,8 @@ rule plotHeatmap_samples:
         module load bioinfo-tools
         module load deepTools/3.1.0
         
-        plotHeatmap --matrixFile {input} --outFileName {output.k3} --kmeans 3 --sortRegions descend --sortUsing median -p 5
-        plotHeatmap --matrixFile {input} --outFileName {output.k4} --kmeans 4 --sortRegions descend --sortUsing median -p 5
-
+        plotHeatmap --matrixFile {input} --outFileName {output.k3} --kmeans 3 --sortRegions descend --sortUsing median
+        plotHeatmap --matrixFile {input} --outFileName {output.k4} --kmeans 4 --sortRegions descend --sortUsing median
         """
 
 

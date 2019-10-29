@@ -68,7 +68,9 @@ rule all:
         deeptoolsdir_plots + "bamFingerprint.pdf",
         expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
         hmDir + "ensGene.cov1x.k4.pdf",
-        expand(hmDirInd + "{id}.ensGene.cov1x.k3.pdf", id=bam_base)
+        expand(hmDirInd + "{id}.ensGene.cov1x.k3.pdf", id=bam_base),
+        hmDir + "MGIGene.scaleregions.cov1x.k4.pdf"
+
 
 
 
@@ -359,7 +361,7 @@ rule plotHeatmap_MGIGeneBody:
     input:
         matrixDir + "MGIGene.scaleregions.cov1x.computeMatrix.gz"
     output:
-        hmDir + "MGIGene.scaleregions.cov1x.k4.pdf",
+        hmDir + "MGIGene.scaleregions.cov1x.k4.pdf"
 
     shell:
         """

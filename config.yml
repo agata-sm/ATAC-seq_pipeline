@@ -17,6 +17,7 @@ mt: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/blacklist/mt.bed
 allTSS: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/bed/refTSS_ALLcenterpoint.bed"
 trxTSS: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/bed/refTSS_geneid.bed"
 ens5gene: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/bed/ens_5gene.bed"
+MGIgene: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/bed/MGI_gene.bed"
 
 # genome size and fragment size
 efGenomeSize: "2308125349"

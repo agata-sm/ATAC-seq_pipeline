@@ -38,6 +38,8 @@ hmDir=deeptoolsdir + "profiles/heatmaps/"
 matrixDirInd= deeptoolsdir + "profiles/computeMatrix_cov1x_samples/"
 hmDirInd=deeptoolsdir + "profiles/heatmaps_samples/"
 
+macs2dir= resdir + "macs2/"
+
 tmpdir= os.getenv('TMPDIR', default='/tmp')
 
 tempdir= resdir + "temporary/"
@@ -70,7 +72,9 @@ rule all:
         hmDir + "ensGene.cov1x.k4.pdf",
         expand(hmDirInd + "{id}.ensGene.cov1x.k3.pdf", id=bam_base),
         hmDir + "MGIGene.scaleregions.cov1x.k4.pdf",
-        hmDir + "MGIGene.TSS.cov1x.k4.pdf"
+        hmDir + "MGIGene.TSS.cov1x.k4.pdf",
+        macs2dir + "merged/allpeaks.bed"
+
 
 
 
@@ -402,6 +406,45 @@ rule plotHeatmap_MGIGeneTSS:
         
         plotHeatmap --matrixFile {input} --outFileName {output} --kmeans 4 --sortRegions descend --sortUsing median
 
+        """
+
+rule MACS2:
+    input:
+        filtbamdir + "{id}.filt.bam"
+    output:
+        xls= macs2dir + "{id}_peaks.xls",
+        narrowPeak= macs2dir + "{id}_peaks.narrowPeak",
+        bed= macs2dir + "{id}_peaks.bed",
+        tmp_bed = macs2dir + "{id}_peaks.tmp.bed"
+
+    shell:
+        """
+        module load bioinfo-tools
+        module load MACS/2.1.2
+        
+        pth="{output.xls}"
+
+        macs2 callpeak -t {input} -f BAM -g  {config[efGenomeSize]} -n ${{pth%_peaks.xls}} -q 0.05 --nomodel --extsize 300 --keep-dup all
+        
+        awk -F' '  '{ for(i=1; i<=6; i++) {print $i} }' {output.narrowPeak} > {output.tmp_bed}
+
+        sort-bed {output.tmp_bed} > {output.bed}
+
+        rm {output.tmp_bed}
+        """
+
+rule mergePeaks:
+    input:
+        expand(macs2dir + "{id}_peaks.bed", id=bam_base)
+    output:
+        macs2dir + "merged/allpeaks.bed"
+    shell:
+        """
+        module load bioinfo-tools
+        module load BEDOPS/2.4.28
+
+        bedops --merge {input} > {output}
+        
         """
 
 

@@ -84,3 +84,6 @@ plotHeatmap_MGIGeneTSS:
   N: 1
   partition: "node"
 
+MACS2:
+  jobname: "macs2"
+  

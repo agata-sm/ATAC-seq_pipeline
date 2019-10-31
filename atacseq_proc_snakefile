@@ -73,9 +73,7 @@ rule all:
         expand(hmDirInd + "{id}.ensGene.cov1x.k3.pdf", id=bam_base),
         hmDir + "MGIGene.scaleregions.cov1x.k4.pdf",
         hmDir + "MGIGene.TSS.cov1x.k4.pdf",
-        macs2dir + "merged/allpeaks.bed"
-
-
+        deeptoolsdir_plots + "CorrSpearman_peaks.pdf"
 
 
 
@@ -428,6 +426,7 @@ rule MACS2:
         
         awk -F' '  '{{ for(i=1; i<=6; i++) {{print $i}} }}' {output.narrowPeak} > {output.tmp_bed}
 
+        module load BEDOPS/2.4.28
         sort-bed {output.tmp_bed} > {output.bed}
 
         rm {output.tmp_bed}
@@ -445,6 +444,35 @@ rule mergePeaks:
 
         bedops --merge {input} > {output}
 
+        """
+
+rule multiBamSummary_peaks:
+    input:
+        expand(filtbamdir + "{id}.filt.bam", id=bam_base),
+        macs2dir + "merged/allpeaks.bed"
+    output:
+        multiBamSummarydir + "multiBamSum_peaks.npz"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        multiBamSummary BED-file --BED {input[1]} --bamfiles {input[0]} --outFileName {output} --numberOfProcessors=4 --extendReads={config[extSize]}
+        """
+
+
+rule plotCorrelation_peaks:
+    input:
+        multiBamSummarydir + "multiBamSum_peaks.npz"
+    output:
+        deeptoolsdir_plots + "CorrSpearman_peaks.pdf"
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        plotCorrelation --corData {input} --corMethod spearman --whatToPlot heatmap --plotFile {output} \
+            --skipZeros --plotFileFormat pdf --plotNumbers
         """
 
 

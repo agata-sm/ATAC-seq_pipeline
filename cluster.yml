@@ -86,4 +86,9 @@ plotHeatmap_MGIGeneTSS:
 
 MACS2:
   jobname: "macs2"
-  
+
+multiBamSummary_peaks:
+  time: "04:00:00"
+  jobname: "multiBamSummary"
+  N: 4
+

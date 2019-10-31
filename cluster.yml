@@ -56,7 +56,6 @@ plotHeatmap_samples:
   time: "03:00:00"
   jobname: "plotHeatmap_smpl"
 
-
 computeMatrix_MGIGeneBody:
   time: "04:00:00"
   jobname: "computeMatrix_MGI"
@@ -69,4 +68,19 @@ plotHeatmap_MGIGeneBody:
   N: 1
   partition: "node"
 
+plotFingerprint:
+  time: "03:00:00"
+  jobname: "plotFingerprint"
+
+computeMatrix_MGIGeneTSS:
+  time: "04:00:00"
+  jobname: "computeMatrix_MGI"
+  N: 1
+  partition: "node"
+
+plotHeatmap_MGIGeneTSS:
+  time: "03:00:00"
+  jobname: "plotHeatmap"
+  N: 1
+  partition: "node"
 

@@ -426,7 +426,7 @@ rule MACS2:
 
         macs2 callpeak -t {input} -f BAM -g  {config[efGenomeSize]} -n ${{pth%_peaks.xls}} -q 0.05 --nomodel --extsize 300 --keep-dup all
         
-        awk -F' '  '{ for(i=1; i<=6; i++) {print $i} }' {output.narrowPeak} > {output.tmp_bed}
+        awk -F' '  '\{ for(i=1; i<=6; i++) \{print $i\} \}' {output.narrowPeak} > {output.tmp_bed}
 
         sort-bed {output.tmp_bed} > {output.bed}
 
@@ -444,7 +444,7 @@ rule mergePeaks:
         module load BEDOPS/2.4.28
 
         bedops --merge {input} > {output}
-        
+
         """
 
 

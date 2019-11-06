@@ -429,8 +429,9 @@ rule MACS2:
         module load BEDOPS/2.4.28
         sort-bed {output.tmp_bed} > {output.bed}
 
-        rm {output.tmp_bed}
         """
+
+
 
 rule mergePeaks:
     input:

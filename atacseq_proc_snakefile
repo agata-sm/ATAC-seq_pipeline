@@ -439,7 +439,7 @@ rule mergePeaks:
     output:
         merged= macs2dir + "merged/merged_peaks.bed",
         union= macs2dir + "merged/union_peaks.bed",
-        reproducible= macs2dir + "merged/reproducible_peaks.bed",
+        reproducible= macs2dir + "merged/reproducible_peaks.bed"
 
     shell:
         """

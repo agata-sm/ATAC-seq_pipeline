@@ -437,20 +437,25 @@ rule mergePeaks:
     input:
         expand(macs2dir + "{id}_peaks.bed", id=bam_base)
     output:
-        macs2dir + "merged/allpeaks.bed"
+        merged= macs2dir + "merged/merged_peaks.bed",
+        union= macs2dir + "merged/union_peaks.bed",
+        reproducible= macs2dir + "merged/reproducible_peaks.bed",
+
     shell:
         """
         module load bioinfo-tools
         module load BEDOPS/2.4.28
 
         bedops --merge {input} > {output}
+        bedops --everything {input} > {output}
 
+        bedmap --echo --echo-map {output.merged} {output.union} > {output.reproducible}
         """
 
 rule multiBamSummary_peaks:
     input:
         expand(filtbamdir + "{id}.filt.bam", id=bam_base),
-        macs2dir + "merged/allpeaks.bed"
+        macs2dir + "merged/merged_peaks.bed"
     output:
         multiBamSummarydir + "multiBamSum_peaks.npz"
     shell:

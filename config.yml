@@ -14,12 +14,12 @@ blacklist: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/blacklist
 mt: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/blacklist/mt.bed"
 
 #gene and TSS annotation for heatmap plotting
-allTSS: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/bed/refTSS_ALLcenterpoint.bed"
-trxTSS: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/bed/refTSS_geneid.bed"
-ens5gene: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/bed/ens_5gene.bed"
-MGIgene: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/bed/MGI_gene.bed"
+ensemblGene: "/proj/uppstore2019111/nobackup/private/nbis4833/annotation/ensembl/processed/Mus_musculus.GRCm38.98.chr.gene.sorted.bed"
+
 
 # genome size and fragment size
+# https://deeptools.readthedocs.io/en/latest/content/feature/effectiveGenomeSize.html
 efGenomeSize: "2308125349"
 extSize: "300"
 
+ 

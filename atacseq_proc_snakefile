@@ -73,7 +73,11 @@ rule all:
         expand(hmDirInd + "{id}.ensGene.cov1x.k3.pdf", id=bam_base),
         hmDir + "MGIGene.scaleregions.cov1x.k4.pdf",
         hmDir + "MGIGene.TSS.cov1x.k4.pdf",
-        deeptoolsdir_plots + "CorrSpearman_peaks.pdf"
+        deeptoolsdir_plots + "CorrSpearman_peaks.pdf",
+        expand(macs2dir + "{id}_peaks.xls", id=bam_base)
+        #summarising plot
+        # featurecounts
+
 
 
 
@@ -231,19 +235,20 @@ rule bamCoverage:
          bg1x= covdir1x + "{id}.norm1x.bg",
          bwCPM= covdirCPM + "{id}.normCPM.bw",
          bgCPM= covdirCPM + "{id}.normCPM.bg"
+
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        bamCoverage --bam {input} --outFileName {output.bw1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization X Y -p 5
+        bamCoverage --bam {input} --outFileName {output.bw1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization X Y MT -p 5
 
-        bamCoverage --bam {input} --outFileName {output.bg1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization X Y -p 5
+        bamCoverage --bam {input} --outFileName {output.bg1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization X Y MT -p 5
 
 
-        bamCoverage --bam {input} --outFileName {output.bwCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization X Y -p 5
+        bamCoverage --bam {input} --outFileName {output.bwCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization X Y MT -p 5
 
-        bamCoverage --bam {input} --outFileName {output.bgCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization X Y -p 5
+        bamCoverage --bam {input} --outFileName {output.bgCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization X Y MT -p 5
 
         """
 
@@ -258,38 +263,9 @@ rule computeMatrix_EnsGeneStart:
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ens5gene]} -o {output.ens_gene}
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ensemblGene]} -o {output.ens_gene}
 
         """
-
-
-rule computeMatrix_refTSS:
-    input:
-        expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
-    output:
-        all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz"
-    shell:
-        """
-        module load bioinfo-tools
-        module load deepTools/3.1.0
-
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[allTSS]} -o {output.all_TSS}
-        """
-
-rule computeMatrix_refTSStrx:
-    input:
-        expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
-    output:
-        trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
-    shell:
-        """
-        module load bioinfo-tools
-        module load deepTools/3.1.0
-
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[trxTSS]} -o {output.trx_TSS}
-
-        """
-
 
 
 rule computeMatrix_samples:
@@ -303,30 +279,22 @@ rule computeMatrix_samples:
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ens5gene]} -o {output.ens_gene}
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ensemblGene]} -o {output.ens_gene}
 
         """
 
 
 rule plotHeatmap:
     input:
-        ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz",
-        all_TSS= matrixDir + "refTSS.cov1x.computeMatrix.gz",
-        trx_TSS= matrixDir + "refTSStrx.cov1x.computeMatrix.gz"
+        ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz"
     output:
-        ens_gene= hmDir + "ensGene.cov1x.k4.pdf",
-        all_TSS= hmDir + "refTSS.cov1x.k4.pdf",
-        trx_TSS= hmDir + "refTSStrx.cov1x.k4.pdf"
+        ens_gene= hmDir + "ensGene.cov1x.k4.pdf"
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
         
         plotHeatmap --matrixFile {input.ens_gene} --outFileName {output.ens_gene} --kmeans 4 --sortRegions descend --sortUsing median
-
-        plotHeatmap --matrixFile {input.all_TSS} --outFileName {output.all_TSS} --kmeans 4 --sortRegions descend --sortUsing median
-
-        plotHeatmap --matrixFile {input.trx_TSS} --outFileName {output.trx_TSS} --kmeans 4 --sortRegions descend --sortUsing median
 
         """
 
@@ -346,65 +314,6 @@ rule plotHeatmap_samples:
         plotHeatmap --matrixFile {input} --outFileName {output.k4} --kmeans 4 --sortRegions descend --sortUsing median
         """
 
-
-rule computeMatrix_MGIGeneBody:
-    input:
-        expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
-    output:
-        matrixDir + "MGIGene.scaleregions.cov1x.computeMatrix.gz"
-    shell:
-        """
-        module load bioinfo-tools
-        module load deepTools/3.1.0
-
-        computeMatrix scale-regions -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[MGIgene]} -o {output}
-
-        """
-
-rule computeMatrix_MGIGeneTSS:
-    input:
-        expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
-    output:
-        matrixDir + "MGIGene.TSS.cov1x.computeMatrix.gz"
-    shell:
-        """
-        module load bioinfo-tools
-        module load deepTools/3.1.0
-
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 5  --referencePoint TSS -p max -S {input} -R {config[MGIgene]} -o {output}
-
-        """
-
-
-rule plotHeatmap_MGIGeneBody:
-    input:
-        matrixDir + "MGIGene.scaleregions.cov1x.computeMatrix.gz"
-    output:
-        hmDir + "MGIGene.scaleregions.cov1x.k4.pdf"
-
-    shell:
-        """
-        module load bioinfo-tools
-        module load deepTools/3.1.0
-        
-        plotHeatmap --matrixFile {input} --outFileName {output} --kmeans 4 --sortRegions descend --sortUsing median
-
-        """
-
-rule plotHeatmap_MGIGeneTSS:
-    input:
-        matrixDir + "MGIGene.TSS.cov1x.computeMatrix.gz"
-    output:
-        hmDir + "MGIGene.TSS.cov1x.k4.pdf"
-
-    shell:
-        """
-        module load bioinfo-tools
-        module load deepTools/3.1.0
-        
-        plotHeatmap --matrixFile {input} --outFileName {output} --kmeans 4 --sortRegions descend --sortUsing median
-
-        """
 
 rule MACS2:
     input:

@@ -71,8 +71,6 @@ rule all:
         expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
         hmDir + "ensGene.cov1x.k4.pdf",
         expand(hmDirInd + "{id}.ensGene.cov1x.k3.pdf", id=bam_base),
-        hmDir + "MGIGene.scaleregions.cov1x.k4.pdf",
-        hmDir + "MGIGene.TSS.cov1x.k4.pdf",
         deeptoolsdir_plots + "CorrSpearman_peaks.pdf",
         expand(macs2dir + "{id}_peaks.xls", id=bam_base)
         #summarising plot

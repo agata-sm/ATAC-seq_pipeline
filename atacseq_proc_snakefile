@@ -109,6 +109,8 @@ rule filter_bam:
         log_blcklst= logdir + "{id}.filt.blacklist.log",
         nonduprm= filtbamdir_dup +  "{id}.filt.NOduprm.bam",
         nonduprm_idx= filtbamdir_dup +  "{id}.filt.NOduprm.bam.bai"
+        bai=filtbamdir + "{id}.filt.bam.bai"
+
     shell:
         """
         module load bioinfo-tools

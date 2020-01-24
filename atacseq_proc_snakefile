@@ -28,15 +28,31 @@ corrdir = qcdir + "deepTools_correlationHM/"
 deeptoolsdir = resdir + "deepTools/"
 covdir1x = deeptoolsdir + "coverage1x/"
 covdirCPM = deeptoolsdir + "coverageCPM/"
-hmdir = deeptoolsdir + "heatmaps_clust/"
 deeptoolsdir_plots= deeptoolsdir + "plots/"
+hmdir = deeptoolsdir + "heatmaps_bin_clust/"
 
 multiBamSummarydir= deeptoolsdir + "multiBamSummary/"
 
-matrixDir= deeptoolsdir + "profiles/computeMatrix_cov1x/"
-hmDir=deeptoolsdir + "profiles/heatmaps/"
-matrixDirInd= deeptoolsdir + "profiles/computeMatrix_cov1x_samples/"
-hmDirInd=deeptoolsdir + "profiles/heatmaps_samples/"
+matrixDir= deeptoolsdir + "profiles/computeMatrix/"
+matrixDir_1x= matrixDir + "cov1x/"
+matrixDir_cpm= matrixDir + "cpm/"
+
+plotDir=deeptoolsdir + "profiles/plots/"
+plotDir_hm_1x=plotDir + "heatmap_cov1x/"
+plotDir_hm_cpm=plotDir + "heatmap_cpm/"
+plotDir_prof_1x=plotDir + "profile_cov1x/"
+plotDir_prof_cpm=plotDir + "profile_cpm/"
+
+matrixDirInd= deeptoolsdir + "profiles/computeMatrix_samples/"
+matrixDirInd_1x= matrixDirInd + "cov1x/"
+matrixDirInd_cpm= matrixDirInd + "cpm/"
+
+plotDirInd=deeptoolsdir + "profiles/plots_samples/"
+plotDirInd_hm_1x=plotDir + "heatmap_cov1x/"
+plotDirInd_hm_cpm=plotDir + "heatmap_cpm/"
+plotDirInd_prof_1x=plotDir + "profile_cov1x/"
+plotDirInd_prof_cpm=plotDir + "profile_cpm/"
+
 
 macs2dir= resdir + "macs2/"
 
@@ -69,14 +85,15 @@ rule all:
         deeptoolsdir_plots + "CorrSpearman_bin5k.pdf",
         deeptoolsdir_plots + "bamFingerprint.pdf",
         expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
-        hmDir + "ensGene.cov1x.k4.pdf",
-        expand(hmDirInd + "{id}.ensGene.cov1x.k3.pdf", id=bam_base),
         deeptoolsdir_plots + "CorrSpearman_peaks.pdf",
-        expand(macs2dir + "{id}_peaks.xls", id=bam_base)
-        #summarising plot
+        expand(macs2dir + "{id}_peaks.xls", id=bam_base),
+        macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed",
+        expand(plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k3.pdf", id=bam_base),
+        plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf",
+        plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf"
+
+
         # featurecounts
-
-
 
 
 rule filter_bam:
@@ -251,66 +268,130 @@ rule bamCoverage:
         """
 
 
-rule computeMatrix_EnsGeneStart:
+rule computeMatrix_EnsGene:
     input:
-        expand (covdir1x + "{id}.norm1x.bw", id=bam_base)
+        cov1x=expand (covdir1x + "{id}.norm1x.bw", id=bam_base),
+        cpm=expand (covdirCPM + "{id}.normCPM.bw", id=bam_base)
+
     output:
-        ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz"
-    shell:
-        """
-        module load bioinfo-tools
-        module load deepTools/3.1.0
-
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ensemblGene]} -o {output.ens_gene}
-
-        """
-
-
-rule computeMatrix_samples:
-    input:
-        covdir1x + "{id}.norm1x.bw"
-    output:
-        ens_gene= matrixDirInd + "{id}.ensGene.cov1x.computeMatrix.gz"
+        ens_gene_1x= matrixDir_1x + "ensGene.gene.cov1x.computeMatrix.gz",
+        ens_tss_1x= matrixDir_1x + "ensGene.TSS.cov1x.computeMatrix.gz",
+        ens_gene_cpm= matrixDir_cpm + "ensGene.gene.CPM.computeMatrix.gz",
+        ens_tss_cpm= matrixDir_cpm + "ensGene.TSS.CPM.computeMatrix.gz"
 
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 10 -p max -S {input} -R {config[ensemblGene]} -o {output.ens_gene}
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 10 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_tss_1x}
+
+        computeMatrix scale-regions -b 1000 -a 1000 --binSize 5 -p 10 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_gene_1x}
+
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 10 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_tss_cpm}
+
+        computeMatrix scale-regions -b 1000 -a 1000 --binSize 5 -p 10 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_gene_cpm}
 
         """
 
 
 rule plotHeatmap:
     input:
-        ens_gene= matrixDir + "ensGene.cov1x.computeMatrix.gz"
+        ens_gene_1x= matrixDir_1x + "ensGene.gene.cov1x.computeMatrix.gz",
+        ens_tss_1x= matrixDir_1x + "ensGene.TSS.cov1x.computeMatrix.gz",
+        ens_gene_cpm= matrixDir_cpm + "ensGene.gene.CPM.computeMatrix.gz",
+        ens_tss_cpm= matrixDir_cpm + "ensGene.TSS.CPM.computeMatrix.gz"
     output:
-        ens_gene= hmDir + "ensGene.cov1x.k4.pdf"
+        ens_gene_1x= plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf",
+        ens_tss_1x= plotDir_hm_1x + "heatmap_signal.ensGene.TSS.cov1x.k4.pdf",
+        ens_gene_cpm= plotDir_hm_cpm + "heatmap_signal.ensGene.gene.CPM.k4.pdf",
+        ens_tss_cpm= plotDir_hm_cpm + "heatmap_signal.ensGene.TSS.CPM.k4.pdf"
+
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
         
-        plotHeatmap --matrixFile {input.ens_gene} --outFileName {output.ens_gene} --kmeans 4 --sortRegions descend --sortUsing median
+        plotHeatmap --matrixFile {input.ens_gene_1x} --outFileName {output.ens_gene_1x} --kmeans 4 --sortRegions descend --sortUsing median
+        plotHeatmap --matrixFile {input.ens_tss_1x} --outFileName {output.ens_tss_1x} --kmeans 4 --sortRegions descend --sortUsing median
+        plotHeatmap --matrixFile {input.ens_tss_cpm} --outFileName {output.ens_tss_cpm} --kmeans 4 --sortRegions descend --sortUsing median
+        plotHeatmap --matrixFile {input.ens_gene_cpm} --outFileName {output.ens_gene_cpm} --kmeans 4 --sortRegions descend --sortUsing median
+        """
+
+
+rule plotProfile:
+    input:
+        ens_gene_1x= matrixDir_1x + "ensGene.gene.cov1x.computeMatrix.gz",
+        ens_tss_1x= matrixDir_1x + "ensGene.TSS.cov1x.computeMatrix.gz",
+        ens_gene_cpm= matrixDir_cpm + "ensGene.gene.CPM.computeMatrix.gz",
+        ens_tss_cpm= matrixDir_cpm + "ensGene.TSS.CPM.computeMatrix.gz"
+    output:
+        ens_gene_1x= plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf",
+        ens_tss_1x= plotDir_prof_1x + "profiles.ensGene.TSS.cov1x.pdf",
+        ens_gene_cpm= plotDir_prof_cpm + "profiles.ensGene.gene.CPM.pdf",
+        ens_tss_cpm= plotDir_prof_cpm + "profiles.ensGene.TSS.CPM.pdf"
+
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        plotProfile -m {input.ens_gene_1x} -out {output.ens_gene_1x} --plotType=lines --perGroup
+        plotProfile -m {input.ens_tss_1x} -out {output.ens_tss_1x} --plotType=lines --perGroup
+        plotProfile -m {input.ens_gene_cpm} -out {output.ens_gene_cpm} --plotType=lines --perGroup
+        plotProfile -m {input.ens_tss_cpm} -out {output.ens_tss_cpm} --plotType=lines --perGroup
+        """
+
+
+rule computeMatrix_samples:
+    input:
+        cov1x=covdir1x + "{id}.norm1x.bw",
+        cpm=covdirCPM + "{id}.normCPM.bw"
+
+    output:
+        ens_gene_1x= matrixDirInd_1x + "{id}.ensGene.gene.cov1x.computeMatrix.gz",
+        ens_TSS_1x= matrixDirInd_1x + "{id}.ensGene.TSS.cov1x.computeMatrix.gz",
+        ens_gene_cpm= matrixDirInd_cpm + "{id}.ensGene.gene.CPM.computeMatrix.gz",
+        ens_TSS_cpm= matrixDirInd_cpm + "{id}.ensGene.TSS.CPM.computeMatrix.gz"
+
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_tss_1x}
+
+        computeMatrix scale-regions -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_gene_1x}
+
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_tss_cpm}
+
+        computeMatrix scale-regions -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_gene_cpm}
 
         """
 
 
 rule plotHeatmap_samples:
     input:
-        matrixDirInd + "{id}.ensGene.cov1x.computeMatrix.gz"
+        ens_TSS_1x= matrixDirInd_1x + "{id}.ensGene.TSS.cov1x.computeMatrix.gz",
+        ens_TSS_cpm= matrixDirInd_cpm + "{id}.ensGene.TSS.CPM.computeMatrix.gz"
     output:
-        k3= hmDirInd + "{id}.ensGene.cov1x.k3.pdf",
-        k4= hmDirInd + "{id}.ensGene.cov1x.k4.pdf"
+        ens_tss_1x_k3= plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k3.pdf",
+        ens_tss_1x_k4= plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k4.pdf",
+        ens_tss_cpm_k3= plotDirInd_hm_cpm + "{id}.heatmap_signal.ensGene.TSS.CPM.k3.pdf",
+        ens_tss_cpm_k4= plotDirInd_hm_cpm + "{id}.heatmap_signal.ensGene.TSS.CPM.k4.pdf"
+
     shell:
         """
         module load bioinfo-tools
         module load deepTools/3.1.0
         
-        plotHeatmap --matrixFile {input} --outFileName {output.k3} --kmeans 3 --sortRegions descend --sortUsing median
-        plotHeatmap --matrixFile {input} --outFileName {output.k4} --kmeans 4 --sortRegions descend --sortUsing median
+        plotHeatmap --matrixFile {input.ens_TSS_1x} --outFileName {output.ens_tss_1x_k3} --kmeans 3 --sortRegions descend --sortUsing median
+        plotHeatmap --matrixFile {input.ens_TSS_1x} --outFileName {output.ens_tss_1x_k4} --kmeans 4 --sortRegions descend --sortUsing median
+
+        plotHeatmap --matrixFile {input.ens_TSS_cpm} --outFileName {output.ens_tss_cpm_k3} --kmeans 3 --sortRegions descend --sortUsing median
+        plotHeatmap --matrixFile {input.ens_TSS_cpm} --outFileName {output.ens_tss_cpm_k4} --kmeans 4 --sortRegions descend --sortUsing median
         """
+
 
 
 rule MACS2:
@@ -355,8 +436,8 @@ rule mergePeaks:
 
 rule multiBamSummary_peaks:
     input:
-        expand(filtbamdir + "{id}.filt.bam", id=bam_base),
-        macs2dir + "merged/merged_peaks.bed"
+        bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
+        peaks=macs2dir + "merged/merged_peaks.bed"
     output:
         multiBamSummarydir + "multiBamSum_peaks.npz"
     shell:
@@ -364,7 +445,9 @@ rule multiBamSummary_peaks:
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        multiBamSummary BED-file --BED {input[1]} --bamfiles {input[0]} --outFileName {output} --numberOfProcessors=4 --extendReads={config[extSize]}
+        echo {input.bam}
+
+        multiBamSummary BED-file --BED {input.peaks} --bamfiles {input.bam} --outFileName {output} --numberOfProcessors=2 --extendReads={config[extSize]}
         """
 
 
@@ -381,6 +464,30 @@ rule plotCorrelation_peaks:
         plotCorrelation --corData {input} --corMethod spearman --whatToPlot heatmap --plotFile {output} \
             --skipZeros --plotFileFormat pdf --plotNumbers
         """
+
+###########################
+# OBS! sample IDs and name in this rule are hardcoded
+
+rule reproducible_peaks:
+    input:
+        expand(macs2dir + "{id}_peaks.bed", id=bam_base)
+    output:
+        macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed"
+    shell:
+        """
+        module load bioinfo-tools
+        module load BEDOPS/2.4.28
+        module load BEDTools/2.27.1
+    
+        BEDs="$(dirname {{input}})"
+        Outdir="$(dirname {{output}})"
+
+        echo "$BEDs"
+        echo "$Outdir"
+
+        bash src/reproducible_peaks.sh $BEDs $Outdir
+        """
+
 
 
 ################################

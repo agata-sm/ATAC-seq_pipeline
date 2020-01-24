@@ -359,11 +359,11 @@ rule computeMatrix_samples:
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_tss_1x}
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_TSS_1x}
 
         computeMatrix scale-regions -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_gene_1x}
 
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_tss_cpm}
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_TSS_cpm}
 
         computeMatrix scale-regions -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_gene_cpm}
 

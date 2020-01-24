@@ -87,7 +87,7 @@ rule all:
         expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
         deeptoolsdir_plots + "CorrSpearman_peaks.pdf",
         expand(macs2dir + "{id}_peaks.xls", id=bam_base),
-        macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed",
+        macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
         expand(plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k3.pdf", id=bam_base),
         plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf",
         plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf"
@@ -490,14 +490,35 @@ rule reproducible_peaks:
         module load BEDOPS/2.4.28
         module load BEDTools/2.27.1
     
-        BEDs="$(dirname {{input}})"
-        Outdir="$(dirname {{output}})"
+        BEDs="$(dirname {input})"
+        Outdir="$(dirname {output})"
 
         echo "$BEDs"
         echo "$Outdir"
 
         bash src/reproducible_peaks.sh $BEDs $Outdir
         """
+
+rule annotate_peaks:
+    input:
+        macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed"
+    output:
+        annot=macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
+        genes_2k=macs2dir + "annotated_reproducible_peaks/GRCm38gene.2000.reproduciblepeaks.bed",
+        genes_3k=macs2dir + "annotated_reproducible_peaks/GRCm38gene.3000.reproduciblepeaks.bed"
+
+    shell:
+        """
+        module load BEDOPS/2.4.28
+        
+        closest-features --dist {input} {config[ensemblGene]} >{output.annot}
+
+        perl -ne 'my $dist=2000; chomp $_; my @records=split /\\|/; my $dist5=$records[2]; my $dist3=$records[4]; if ( ($dist5 ne qw /NA/) && ($dist3 ne qw /NA/) ) { if( (abs($dist5)<abs($dist3)) && (abs($dist5)<=$dist) ){{ print "$records[1]\n"}} elsif( (abs($dist3)<abs($dist5)) && (abs($dist3)<=$dist) ){ print "$records[3]\n"} elsif( (abs($dist5)==abs($dist3) ) && (abs($dist5)<=$dist) ){{ print "$records[1]\n$records[3]\n"}} }} else { if ( ($dist5 eq qw /NA/) && ($dist3 ne qw /NA/) ) {{print "$records[3]\n"}} elsif ( ($dist5 ne qw /NA/) && ($dist3 eq qw /NA/) ) {{print "$records[1]\n"}} }}' {output.annot} > {output.genes_2k}
+
+        perl -ne 'my $dist=3000; chomp $_; my @records=split /\\|/; my $dist5=$records[2]; my $dist3=$records[4]; if ( ($dist5 ne qw /NA/) && ($dist3 ne qw /NA/) ) { if( (abs($dist5)<abs($dist3)) && (abs($dist5)<=$dist) ){{ print "$records[1]\n"}} elsif( (abs($dist3)<abs($dist5)) && (abs($dist3)<=$dist) ){ print "$records[3]\n"} elsif( (abs($dist5)==abs($dist3) ) && (abs($dist5)<=$dist) ){{ print "$records[1]\n$records[3]\n"}} }} else { if ( ($dist5 eq qw /NA/) && ($dist3 ne qw /NA/) ) {{print "$records[3]\n"}} elsif ( ($dist5 ne qw /NA/) && ($dist3 eq qw /NA/) ) {{print "$records[1]\n"}} }}' {output.annot} > {output.genes_3k}
+
+        """
+
 
 
 

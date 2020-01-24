@@ -204,15 +204,18 @@ rule xcor:
 
 rule multiBamSummary:
     input:
-        expand(filtbamdir + "{id}.filt.bam", id=bam_base)
+        bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
+        bai=expand(filtbamdir + "{id}.filt.bam.bai", id=bam_base),
     output:
         multiBamSummarydir + "multiBamSum_bin_5k.npz"
     shell:
         """
+        for b_idx in {input.bai}; do touch $b_idx; done
+
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        multiBamSummary bins --bamfiles {input} --outFileName {output} --binSize=5000 --numberOfProcessors=4 --extendReads={config[extSize]}
+        multiBamSummary bins --bamfiles {input.bam} --outFileName {output} --binSize=5000 --numberOfProcessors=4 --extendReads={config[extSize]}
         """
 
 rule plotCorrelation:
@@ -244,7 +247,8 @@ rule plotFingerprint:
 
 rule bamCoverage:
     input:
-        filtbamdir + "{id}.filt.bam"
+        bam=filtbamdir + "{id}.filt.bam",
+        bai=filtbamdir + "{id}.filt.bam.bai",
     output:
          bw1x= covdir1x + "{id}.norm1x.bw",
          bg1x= covdir1x + "{id}.norm1x.bg",
@@ -253,6 +257,8 @@ rule bamCoverage:
 
     shell:
         """
+        touch {input.bai}
+
         module load bioinfo-tools
         module load deepTools/3.1.0
 
@@ -437,6 +443,7 @@ rule mergePeaks:
 rule multiBamSummary_peaks:
     input:
         bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
+        bai=expand(filtbamdir + "{id}.filt.bam.bai", id=bam_base),
         peaks=macs2dir + "merged/merged_peaks.bed"
     output:
         multiBamSummarydir + "multiBamSum_peaks.npz"
@@ -446,7 +453,9 @@ rule multiBamSummary_peaks:
         module load deepTools/3.1.0
 
         echo {input.bam}
-
+    
+        for b_idx in {input.bai}; do touch $b_idx; done
+        
         multiBamSummary BED-file --BED {input.peaks} --bamfiles {input.bam} --outFileName {output} --numberOfProcessors=2 --extendReads={config[extSize]}
         """
 
@@ -466,7 +475,7 @@ rule plotCorrelation_peaks:
         """
 
 ###########################
-# OBS! sample IDs and name in this rule are hardcoded
+# OBS! sample IDs and name in the script used in this rule are hardcoded (for future improvement ;-))
 
 rule reproducible_peaks:
     input:

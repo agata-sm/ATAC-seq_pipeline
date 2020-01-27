@@ -250,7 +250,7 @@ rule plotFingerprint:
 rule bamCoverage:
     input:
         bam=filtbamdir + "{id}.filt.bam",
-        bai=filtbamdir + "{id}.filt.bam.bai",
+        bai=filtbamdir + "{id}.filt.bam.bai"
     output:
          bw1x= covdir1x + "{id}.norm1x.bw",
          bg1x= covdir1x + "{id}.norm1x.bg",
@@ -264,14 +264,14 @@ rule bamCoverage:
         module load bioinfo-tools
         module load deepTools/3.1.0
 
-        bamCoverage --bam {input} --outFileName {output.bw1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization X Y MT -p 5
+        bamCoverage --bam {input.bam} --outFileName {output.bw1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization X Y MT -p 5
 
-        bamCoverage --bam {input} --outFileName {output.bg1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization X Y MT -p 5
+        bamCoverage --bam {input.bam} --outFileName {output.bg1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization X Y MT -p 5
 
 
-        bamCoverage --bam {input} --outFileName {output.bwCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization X Y MT -p 5
+        bamCoverage --bam {input.bam} --outFileName {output.bwCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization X Y MT -p 5
 
-        bamCoverage --bam {input} --outFileName {output.bgCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization X Y MT -p 5
+        bamCoverage --bam {input.bam} --outFileName {output.bgCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization X Y MT -p 5
 
         """
 
@@ -519,7 +519,11 @@ rule annotate_peaks:
 
         """
 
-
+# rule featureCounts:
+#     input:
+#         bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base)
+#         peaks=
+#     output:
 
 
 ################################

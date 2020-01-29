@@ -90,10 +90,8 @@ rule all:
         macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
         expand(plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k3.pdf", id=bam_base),
         plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf",
-        plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf"
-
-
-        # featurecounts
+        plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf",
+        macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab"
 
 
 rule filter_bam:
@@ -504,8 +502,9 @@ rule annotate_peaks:
         macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed"
     output:
         annot=macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
-        genes_2k=macs2dir + "annotated_reproducible_peaks/GRCm38gene.2000.reproduciblepeaks.bed",
-        genes_3k=macs2dir + "annotated_reproducible_peaks/GRCm38gene.3000.reproduciblepeaks.bed"
+        peaks_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff",
+        genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes.2000.bed",
+        genes_2k_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes.2000.gff"
 
     shell:
         """
@@ -513,18 +512,19 @@ rule annotate_peaks:
         
         closest-features --dist {input} {config[ensemblGene]} >{output.annot}
 
-        perl -ne 'my $dist=2000; chomp $_; my @records=split /\\|/; my $dist5=$records[2]; my $dist3=$records[4]; if ( ($dist5 ne qw /NA/) && ($dist3 ne qw /NA/) ) { if( (abs($dist5)<abs($dist3)) && (abs($dist5)<=$dist) ){{ print "$records[1]\n"}} elsif( (abs($dist3)<abs($dist5)) && (abs($dist3)<=$dist) ){ print "$records[3]\n"} elsif( (abs($dist5)==abs($dist3) ) && (abs($dist5)<=$dist) ){{ print "$records[1]\n$records[3]\n"}} }} else { if ( ($dist5 eq qw /NA/) && ($dist3 ne qw /NA/) ) {{print "$records[3]\n"}} elsif ( ($dist5 ne qw /NA/) && ($dist3 eq qw /NA/) ) {{print "$records[1]\n"}} }}' {output.annot} > {output.genes_2k}
-
-        perl -ne 'my $dist=3000; chomp $_; my @records=split /\\|/; my $dist5=$records[2]; my $dist3=$records[4]; if ( ($dist5 ne qw /NA/) && ($dist3 ne qw /NA/) ) { if( (abs($dist5)<abs($dist3)) && (abs($dist5)<=$dist) ){{ print "$records[1]\n"}} elsif( (abs($dist3)<abs($dist5)) && (abs($dist3)<=$dist) ){ print "$records[3]\n"} elsif( (abs($dist5)==abs($dist3) ) && (abs($dist5)<=$dist) ){{ print "$records[1]\n$records[3]\n"}} }} else { if ( ($dist5 eq qw /NA/) && ($dist3 ne qw /NA/) ) {{print "$records[3]\n"}} elsif ( ($dist5 ne qw /NA/) && ($dist3 eq qw /NA/) ) {{print "$records[1]\n"}} }}' {output.annot} > {output.genes_3k}
+        perl src/peaks2gff.pl --distance 2000 --infile {output.annot} --outfile {output.peaks_genes_2k}
 
         """
 
-# rule featureCounts:
-#     input:
-#         bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base)
-#         peaks=
-#     output:
-
+rule featureCounts:
+    input:
+        bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base)
+        peaks_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff"
+    output:
+        allpeaks_cnt = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",
+        allpeaks_log = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab.summary",
+        peaks_genes2k_cnt = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab",
+        peaks_genes2k_log =macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab.summary"
 
 ################################
 ## final rules

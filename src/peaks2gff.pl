@@ -2,6 +2,7 @@
 
 
 # script to generate gtf with coordinates of annotated peaks
+# bed files of genes with peaks within select distance (2kb)
 # proj 4833
 # 27 - 28 i 2020
 
@@ -22,6 +23,8 @@ if ($ARGV[0]eq qw '-h'){
 	print "arguments:\n";
 	print "--infile: /path/to/annotated_peaks.bed\n";
 	print "--outfile_gtf: /path/to/gtf\n";
+	print "--distance: distance gene to the annotated peak\n";
+
 }
 
 else{
@@ -31,23 +34,27 @@ else{
 	#commandline parsing for parameters
 	GetOptions(
 		'infile=s'		=>	\(my $infile),
-		'outfile_gtf=s'		=>	\(my $outfile_gtf)
+		'outfile_gtf=s'		=>	\(my $outfile_gtf),
+		'distance=s'		=>	\(my $peak_dist)
 	) or die "Error in command line arguments";
 
 
 	#outfile info contains more info on genes annotated to peaks
 	my $outfile_info="$outfile_gtf\_genes_info.tab"; 
-
-
+	my $outfile_genes_dist="$outfile_gtf\.genes\.$peak_dist\.bed";
+	my $outfile_gtf_genes="$outfile_gtf\.genes\.$peak_dist\.gff";
 
 	open (INFILE, "<","$infile") or die "Cannot open input file $infile: $!"; 
 
-	open (OUTFILE_GTF, ">","$outfile_gtf") or die "Cannot open input file $outfile_gtf: $!"; 
-	open (OUTFILE_INFO, ">","$outfile_info") or die "Cannot open input file $outfile_info: $!"; 
+	open (OUTFILE_GTF, ">","$outfile_gtf") or die "Cannot open output file $outfile_gtf: $!"; 
+	open (OUTFILE_INFO, ">","$outfile_info") or die "Cannot open output file $outfile_info: $!"; 
 
 	my $header_info="peakid\tchr\tstart\tend\tensembl_gene_5\tname_gene_5\tbiotype_gene_5\tdistance_gene_5\tensembl_gene_3\tname_gene_3\tdistance_gene_3\tbiotype_gene_3";
 	print OUTFILE_INFO "$header_info\n";
 
+	open (OUTFILE_BED, ">", "$outfile_genes_dist") or die "Cannot open output file $outfile_genes_dist: $!";
+
+	open (OUTFILE_GTF_GENES, ">","$outfile_gtf_genes") or die "Cannot open output file $outfile_gtf_genes: $!";
 
 	my $peak_number=1;
 
@@ -85,9 +92,10 @@ else{
 		my $gene3_name;
 		my $gene3_biotype;
 
+
 		if ( ($dist5 ne qw /NA/) && ($dist3 ne qw /NA/) ) {
-			my ($gene5_chr,$gene5_start,$gene5_end,$gene5_attr)=split/\t/,$gene5;
-			my ($gene3_chr,$gene3_start,$gene3_end,$gene3_attr)=split/\t/,$gene3;
+			my ($gene5_chr,$gene5_start,$gene5_end,$gene5_attr,$gene5_score,$gene5_strand)=split/\t/,$gene5;
+			my ($gene3_chr,$gene3_start,$gene3_end,$gene3_attr,$gene3_score,$gene3_strand)=split/\t/,$gene3;
 
 			my @gene5_info=split/;\s/,$gene5_attr;
 			my @gene3_info=split/;\s/,$gene3_attr;
@@ -119,12 +127,28 @@ else{
 				$gene_name=$gene5_name;
 				$gene_biotype=$gene5_biotype;
 
+				if ($dist5<$peak_dist){
+					print OUTFILE_BED "$gene5\n";
+					my $gene_start_gtf=$gene5_start+1;
+					my $gtf_line_gene="$gene5_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene5_end\t.\t$gene5_strand\t.\t$gene5_attr";
+					print OUTFILE_GTF_GENES "$gtf_line_gene\n";
+
+				}
 
 			}elsif (abs($dist3)<abs($dist5)) {
 				$dist=$dist3;
 				$gene_id=$gene3_id;
 				$gene_name=$gene3_name;
 				$gene_biotype=$gene3_biotype;
+
+				if ($dist3<$peak_dist){
+					print OUTFILE_BED "$gene3\n";
+					my $gene_start_gtf=$gene3_start+1;
+					my $gtf_line_gene="$gene3_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene3_end\t.\t$gene3_strand\t.\t$gene3_attr";
+					print OUTFILE_GTF_GENES "$gtf_line_gene\n";
+				}
+
+
 
 			}elsif (abs($dist5)==abs($dist3)){
 				$dist=$dist5;
@@ -136,10 +160,23 @@ else{
 
 				$gene_name="$gene5_name\_$gene3_name";
 
+				if ($dist3<$peak_dist){
+					print OUTFILE_BED "$gene3\n";
+					print OUTFILE_BED "$gene5\n";
+					my $gene_start_gtf=$gene3_start+1;
+					my $gtf_line_gene1="$gene3_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene3_end\t.\t$gene3_strand\t.\t$gene3_attr";
+					print OUTFILE_GTF_GENES "$gtf_line_gene1\n";
+
+					my $gene_start_gtf2=$gene5_start+1;
+					my $gtf_line_gene2="$gene5_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene5_end\t.\t$gene5_strand\t.\t$gene5_attr";
+					print OUTFILE_GTF_GENES "$gtf_line_gene2\n";
+
+				}
 			} 
+
 		}elsif( ($dist5 eq qw /NA/) && ($dist3 ne qw /NA/) ){
 
-			my ($gene3_chr,$gene3_start,$gene3_end,$gene3_attr)=split/\t/,$gene3;
+			my ($gene3_chr,$gene3_start,$gene3_end,$gene3_attr,$gene3_score,$gene3_strand)=split/\t/,$gene3;
 			my @gene3_info=split/;\s/,$gene3_attr;
 			$gene3_id=$gene3_info[0];
 			$gene3_id=~s/gene_id\s+//;
@@ -159,9 +196,19 @@ else{
 			$gene5_name="NA";
 			$gene5_biotype="NA";
 
+
+			if ($dist<$peak_dist){
+				print OUTFILE_BED "$gene3\n";
+				my $gene_start_gtf=$gene3_start+1;
+				my $gtf_line_gene="$gene3_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene3_end\t.\t$gene3_strand\t.\t$gene3_attr";
+				print OUTFILE_GTF_GENES "$gtf_line_gene\n";
+
+			}
+
+
 		}elsif( ($dist5 ne qw /NA/) && ($dist3 eq qw /NA/) ){
 
-			my ($gene5_chr,$gene5_start,$gene5_end,$gene5_attr)=split/\t/,$gene5;
+			my ($gene5_chr,$gene5_start,$gene5_end,$gene5_attr,$gene5_score,$gene5_strand)=split/\t/,$gene5;
 			my @gene5_info=split/;\s/,$gene5_attr;
 			$gene5_id=$gene5_info[0];
 			$gene5_id=~s/gene_id\s+//;
@@ -181,6 +228,14 @@ else{
 			$gene3_biotype="NA";
 
 
+			if ($dist<$peak_dist){
+				print OUTFILE_BED "$gene5\n";
+				my $gene_start_gtf=$gene5_start+1;
+				my $gtf_line_gene="$gene5_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene5_end\t.\t$gene5_strand\t.\t$gene5_attr";
+				print OUTFILE_GTF_GENES "$gtf_line_gene\n";
+
+			}
+
 		
 		}
 
@@ -190,6 +245,9 @@ else{
 		print OUTFILE_GTF "$gtf_line1\t$gtf_line2\n";
 
 		print OUTFILE_INFO "$peak_name\t$peak_bed[0]\t$start\t$peak_bed[2]\t$gene5_id\t$gene5_name\t$dist5\t$gene5_biotype\t$gene3_id\t$gene3_name\t$dist3\t$gene3_biotype\n";
+
+
+
 
 	}
 

@@ -508,6 +508,7 @@ rule annotate_peaks:
 
     shell:
         """
+        module load bioinfo-tools
         module load BEDOPS/2.4.28
         
         closest-features --dist {input} {config[ensemblGene]} >{output.annot}
@@ -518,13 +519,28 @@ rule annotate_peaks:
 
 rule featureCounts:
     input:
-        bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base)
-        peaks_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff"
+        bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
+        peaks_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff",
+        peaks_2k=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes.2000.gff"
     output:
         allpeaks_cnt = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",
         allpeaks_log = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab.summary",
         peaks_genes2k_cnt = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab",
         peaks_genes2k_log =macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab.summary"
+    shell:
+        """
+        module load bioinfo-tools
+        module load subread/2.0.0
+
+        featureCounts -s 0 -t gene -g gene_id \
+        -a {input.peaks_gff]} \
+        -o {output.allpeaks_cnt} {input.bam}
+
+
+        featureCounts -s 0 -t gene -g gene_id \
+        -a {input.peaks_2k} \
+        -o {output.peaks_genes2k_cnt} {input.bam}
+        """
 
 ################################
 ## final rules

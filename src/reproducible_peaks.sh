@@ -16,7 +16,8 @@ final_outfile=$outdir"/"all.reproduciblepeaks.merged.bed
 declare -a INTersect_sample
 
 
-
+echo "outdir is $outdir"
+echo "final file is $final_outfile"
 
 ##### ctrl
 
@@ -37,6 +38,7 @@ for pair in "${pairs[@]}"; do
 
     #Then either use Array Indexing on the array ie. 
     #Or place the offsets in their own variables. ie Run=${tmpArr[0] ...;
+    echo "intersecting peaks in files"
     echo "$BEDs/${tmpArr[0]} $BEDs/${tmpArr[1]}"
 
     f1=${tmpArr[0]}
@@ -52,7 +54,6 @@ for pair in "${pairs[@]}"; do
     echo "$outfile"
 
     INTersect_pairs=("${INTersect_pairs[@]}" "$outfile")
-    echo "$INTersect_pairs"
 
     intersectBed -a $BEDs"/"${tmpArr[0]} -b $BEDs"/"${tmpArr[1]} -f 0.5 -r > $outfile
 

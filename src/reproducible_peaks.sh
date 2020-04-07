@@ -49,8 +49,10 @@ for pair in "${pairs[@]}"; do
     smplID2=${smplID2%_peaks.bed}
 
     outfile=$outdir"/"$smplID1.$smplID2.$sample.intersect.bed
+    echo "$outfile"
 
     INTersect_pairs=("${INTersect_pairs[@]}" "$outfile")
+    echo "@INTersect_pairs"
 
     intersectBed -a $BEDs"/"${tmpArr[0]} -b $BEDs"/"${tmpArr[1]} -f 0.5 -r > $outfile
 

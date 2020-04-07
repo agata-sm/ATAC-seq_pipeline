@@ -491,7 +491,7 @@ rule reproducible_peaks:
         BEDs="$(dirname {input})"
         Outdir="$(dirname {output})"
 
-        echo "$BEDs"
+        #echo "$BEDs"
         echo "$Outdir"
 
         bash src/reproducible_peaks.sh $BEDs $Outdir

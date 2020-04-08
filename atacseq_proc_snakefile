@@ -494,7 +494,7 @@ rule reproducible_peaks:
         #echo "$BEDs"
         echo "$Outdir"
 
-        bash src/reproducible_peaks.sh -b $BEDs -o $Outdir
+        bash src/reproducible_peaks.sh -b ${{BEDs}} -o ${{Outdir}}
         """
 
 rule annotate_peaks:

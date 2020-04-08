@@ -1,12 +1,15 @@
 #!/bin/bash -l
 
 
+while getopts b:o: option
+do
+    case "${option}"
+    in
+    b) BEDs=${OPTARG};;
+    o) outdir=${OPTARG};;
+    esac
+done
 
-# Copy command-line arguments over to new array
-ARGS=( $@ )
-
-BEDs=${ARGS[0]}
-outdir=${ARGS[1]}
 
 mkdir -p $outdir
 

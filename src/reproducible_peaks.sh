@@ -1,26 +1,19 @@
 #!/bin/bash -l
 
 
-while getopts b:o: option
-do
-    case "${option}"
-    in
-    b) BEDs=${OPTARG};;
-    o) outdir=${OPTARG};;
-    esac
-done
+outdir="results/macs2/reproducible_peaks"
+BEDs="results/macs2"
 
+final_outfile=$outdir"/"all.reproduciblepeaks.merged.bed
+
+echo "the outdir is $outdir"
+echo "the final file is $final_outfile"
 
 mkdir -p $outdir
 
 
-final_outfile=$outdir"/"all.reproduciblepeaks.merged.bed
-
 declare -a INTersect_sample
 
-
-echo "the outdir is $outdir"
-echo "the final file is $final_outfile"
 
 ##### ctrl
 

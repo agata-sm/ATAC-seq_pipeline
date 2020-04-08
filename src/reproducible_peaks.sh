@@ -19,8 +19,8 @@ final_outfile=$outdir"/"all.reproduciblepeaks.merged.bed
 declare -a INTersect_sample
 
 
-echo "outdir is $outdir"
-echo "final file is $final_outfile"
+echo "the outdir is $outdir"
+echo "the final file is $final_outfile"
 
 ##### ctrl
 

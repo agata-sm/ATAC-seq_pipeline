@@ -549,7 +549,7 @@ rule featureCounts:
 rule subset_bam_to_genes:
     input:
         bam=filtbamdir + "{id}.filt.bam",
-        genes=genes_2k_padded=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.gene_coordinates_2500.bed"
+        genes=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.gene_coordinates_2500.bed"
     output:
         temp(tempdir + "{id}.filt.subset_genes.bw")
     shell:
@@ -572,7 +572,7 @@ rule subset_bam_to_genes:
 rule profile_plots_genes_with_peaks:
     input:
         bw=expand(tempdir + "{id}.filt.subset_genes.bw", id=bam_base),#LibLabels=expand(bam_base),
-        genes=genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.bed"
+        genes=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.bed"
     output:
         out_matrix_region=visdir + "reproducible_peaks.ensgenes.rpkm.genebody.computeMatrix.gz",
         out_matrix_tss=visdir + "reproducible_peaks.ensgenes.rpkm.TSS.computeMatrix.gz",

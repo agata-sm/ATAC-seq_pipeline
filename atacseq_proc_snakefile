@@ -571,8 +571,7 @@ rule subset_bam_to_genes:
 
 rule profile_plots_genes_with_peaks:
     input:
-        bw=expand(tempdir + "{id}.filt.subset_genes.bw", id=bam_base),
-        LibLabels=expand(bam_base),
+        bw=expand(tempdir + "{id}.filt.subset_genes.bw", id=bam_base),#LibLabels=expand(bam_base),
         genes=genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.bed"
     output:
         out_matrix_region=visdir + "reproducible_peaks.ensgenes.rpkm.genebody.computeMatrix.gz",
@@ -587,9 +586,9 @@ rule profile_plots_genes_with_peaks:
         files={input.bw}
         Lib_Labels=${{files%filt.subset_genes.bw}}
 
-        echo "files used are ${{files}}"
+        echo "files used are $files"
         echo "labels used are"
-        echo "${{Lib_Labels}}"
+        echo "$Lib_Labels"
 
         computeMatrix reference-point -b 500 -a 500 --binSize 1 -p 1 -S {input.bw} --referencePoint TSS --samplesLabel $Lib_Labels -R {input.genes} -o ${output.out_matrix_tss}
 
@@ -598,7 +597,6 @@ rule profile_plots_genes_with_peaks:
         plotProfile -m {output.out_matrix_region} -out {output.out_profile_region} --plotType=lines --perGroup
         plotProfile -m {output.out_matrix_tss} -out {output.out_profile_tss} --plotType=lines --perGroup
         """
-
 
 
 

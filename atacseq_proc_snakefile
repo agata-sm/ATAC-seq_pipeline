@@ -543,8 +543,8 @@ rule featureCounts:
         -o {output.peaks_genes2k_cnt} {input.bam}
         """
 
-rule profile_plots_genes_with_peaks:
-    input:
+# rule profile_plots_genes_with_peaks:
+#     input:
 
 
 ################################

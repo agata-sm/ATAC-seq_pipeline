@@ -514,7 +514,7 @@ rule annotate_peaks:
         
         closest-features --dist {input} {config[ensemblGene]} >{output.annot}
 
-        perl src/peaks2gff.pl --distance 2000 --infile {output.annot} --outfile {output.peaks_genes_2k_gff}
+        perl src/peaks2gff.pl --distance 2000 --infile {output.annot} --outfile {output.peaks_gff}
 
         """
 

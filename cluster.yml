@@ -54,3 +54,7 @@ multiBamSummary_peaks:
   jobname: "multiBamSummary"
   N: 2
 
+subset_bam_to_genes:
+  time: "01:00:00"
+  jobname: "subsetBam"
+  N: 2

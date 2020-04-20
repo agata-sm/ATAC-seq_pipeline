@@ -30,6 +30,7 @@ covdir1x = deeptoolsdir + "coverage1x/"
 covdirCPM = deeptoolsdir + "coverageCPM/"
 deeptoolsdir_plots= deeptoolsdir + "plots/"
 hmdir = deeptoolsdir + "heatmaps_bin_clust/"
+visdir= deeptoolsdir + "visualisations/profiles_genes_with_peaks/"
 
 multiBamSummarydir= deeptoolsdir + "multiBamSummary/"
 
@@ -91,7 +92,8 @@ rule all:
         expand(plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k3.pdf", id=bam_base),
         plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf",
         plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf",
-        macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab"
+        macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab",
+        visdir + "reproducible_peaks.ensgenes.rpkm.TSS.profile.pdf"
 
 
 rule filter_bam:
@@ -503,9 +505,10 @@ rule annotate_peaks:
         macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed"
     output:
         annot=macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
-        peaks_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff",
-        genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes.2000.bed",
-        genes_2k_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes.2000.gff"
+        peaks_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf",
+        genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.bed",
+        genes_2k_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.gtf",
+        genes_2k_padded=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.gene_coordinates_2500.bed"
 
     shell:
         """
@@ -514,15 +517,14 @@ rule annotate_peaks:
         
         closest-features --dist {input} {config[ensemblGene]} >{output.annot}
 
-        perl src/peaks2gff.pl --distance 2000 --infile {output.annot} --outfile {output.peaks_gff}
-
+        perl src/peaks2gff_v2.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot} --outfile {output.peaks_gtf}
         """
 
 rule featureCounts:
     input:
         bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
-        peaks_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff",
-        peaks_2k=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes.2000.gff"
+        peaks_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf",
+        peaks_2k=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.gtf"
     output:
         allpeaks_cnt = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",
         allpeaks_log = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab.summary",
@@ -543,8 +545,63 @@ rule featureCounts:
         -o {output.peaks_genes2k_cnt} {input.bam}
         """
 
-# rule profile_plots_genes_with_peaks:
-#     input:
+
+rule subset_bam_to_genes:
+    input:
+        bam=filtbamdir + "{id}.filt.bam",
+        genes=genes_2k_padded=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.gene_coordinates_2500.bed"
+    output:
+        temp(tempdir + "{id}.filt.subset_genes.bw")
+    shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+        module load samtools/1.9
+    
+        TMPDIR="${{TMPDIR:-/tmp}}"
+    
+        cd $TMPDIR
+
+        samtools view -L {input.genes} -hbo {wildcards.id}.subset_genes.bam {input.bam}
+        samtools index {wildcards.id}.subset_genes.bam
+
+        bamCoverage --normalizeUsing RPKM --exactScaling --extendReads 200 --binSize 1 --outFileFormat bigwig -p 2 --bam {wildcards.id}.subset_genes.bam --outFileName {output}
+        """
+
+
+rule profile_plots_genes_with_peaks:
+    input:
+        bw=expand(tempdir + "{id}.filt.subset_genes.bw", id=bam_base),
+        LibLabels=expand(bam_base),
+        genes=genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.bed"
+    output:
+        out_matrix_region=visdir + "reproducible_peaks.ensgenes.rpkm.genebody.computeMatrix.gz",
+        out_matrix_tss=visdir + "reproducible_peaks.ensgenes.rpkm.TSS.computeMatrix.gz",
+        out_profile_region=visdir + "reproducible_peaks.ensgenes.rpkm.genebody.profile.pdf",
+        out_profile_tss=visdir + "reproducible_peaks.ensgenes.rpkm.TSS.profile.pdf"
+   shell:
+        """
+        module load bioinfo-tools
+        module load deepTools/3.1.0
+        
+        files={input.bw}
+        Lib_Labels=${{files%filt.subset_genes.bw}}
+
+        echo "files used are ${{files}}"
+        echo "labels used are"
+        echo "${{Lib_Labels}}"
+
+        computeMatrix reference-point -b 500 -a 500 --binSize 1 -p 1 -S {input.bw} --referencePoint TSS --samplesLabel $Lib_Labels -R {input.genes} -o ${output.out_matrix_tss}
+
+        computeMatrix scale-regions -b 500 -a 0 --binSize 1 -p 1 -S {input.bw} --samplesLabel $Lib_Labels -R {input.genes} -o {output.out_matrix_region}
+
+        plotProfile -m {output.out_matrix_region} -out {output.out_profile_region} --plotType=lines --perGroup
+        plotProfile -m {output.out_matrix_tss} -out {output.out_profile_tss} --plotType=lines --perGroup
+        """
+
+
+
+
 
 
 ################################

@@ -5,8 +5,8 @@ module load BEDOPS/2.4.28
 module load BEDTools/2.27.1
     
 
-outdir=".results/macs2/reproducible_peaks"
-BEDs=".results/macs2"
+outdir="results/macs2/reproducible_peaks"
+BEDs="results/macs2"
 
 final_outfile=$outdir"/all.reproduciblepeaks.merged.bed"
 

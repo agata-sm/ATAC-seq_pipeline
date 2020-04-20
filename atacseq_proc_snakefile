@@ -255,6 +255,7 @@ rule bamCoverage:
          bwCPM= covdirCPM + "{id}.normCPM.bw",
          bgCPM= covdirCPM + "{id}.normCPM.bg"
 
+
     shell:
         """
         touch {input.bai}
@@ -276,8 +277,8 @@ rule bamCoverage:
 
 rule computeMatrix_EnsGene:
     input:
-        cov1x=expand (covdir1x + "{id}.norm1x.bw", id=bam_base),
-        cpm=expand (covdirCPM + "{id}.normCPM.bw", id=bam_base)
+        cov1x=expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
+        cpm=expand(covdirCPM + "{id}.normCPM.bw", id=bam_base)
 
     output:
         ens_gene_1x= matrixDir_1x + "ensGene.gene.cov1x.computeMatrix.gz",
@@ -541,6 +542,10 @@ rule featureCounts:
         -a {input.peaks_2k} \
         -o {output.peaks_genes2k_cnt} {input.bam}
         """
+
+rule profile_plots_genes_with_peaks:
+    input:
+
 
 ################################
 ## final rules

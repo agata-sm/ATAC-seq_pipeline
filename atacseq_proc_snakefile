@@ -563,10 +563,10 @@ rule subset_bam_to_genes:
     
         cd $TMPDIR
 
-        samtools view -L {input.genes} -hbo {wildcards.id}.subset_genes.bam {input.bam}
-        samtools index {wildcards.id}.subset_genes.bam
+        samtools view -L {input.genes} -hbo $TMPDIR/{wildcards.id}.subset_genes.bam {input.bam}
+        samtools index $TMPDIR/{wildcards.id}.subset_genes.bam
 
-        bamCoverage --normalizeUsing RPKM --exactScaling --extendReads 200 --binSize 1 --outFileFormat bigwig -p 2 --bam {wildcards.id}.subset_genes.bam --outFileName {output}
+        bamCoverage --normalizeUsing RPKM --exactScaling --extendReads 200 --binSize 1 --outFileFormat bigwig -p 2 --bam $TMPDIR/{wildcards.id}.subset_genes.bam --outFileName {output}
         """
 
 

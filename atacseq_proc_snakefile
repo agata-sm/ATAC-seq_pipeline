@@ -506,9 +506,9 @@ rule annotate_peaks:
     output:
         annot=macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
         peaks_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf",
-        genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.bed",
-        genes_2k_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.gtf",
-        genes_2k_padded=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.gene_coordinates_2500.bed"
+        genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf.genes_2000.bed",
+        genes_2k_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf.genes_2000.gtf",
+        genes_2k_padded=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf.genes_2000.gene_coordinates_2500.bed"
 
     shell:
         """
@@ -524,7 +524,7 @@ rule featureCounts:
     input:
         bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
         peaks_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf",
-        peaks_2k=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.gtf"
+        peaks_2k=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf.genes_2000.gtf"
     output:
         allpeaks_cnt = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",
         allpeaks_log = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab.summary",
@@ -549,7 +549,7 @@ rule featureCounts:
 rule subset_bam_to_genes:
     input:
         bam=filtbamdir + "{id}.filt.bam",
-        genes=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.gene_coordinates_2500.bed"
+        genes=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf.genes_2000.gene_coordinates_2500.bed"
     output:
         temp(tempdir + "{id}.filt.subset_genes.bw")
     shell:
@@ -572,7 +572,7 @@ rule subset_bam_to_genes:
 rule profile_plots_genes_with_peaks:
     input:
         bw=expand(tempdir + "{id}.filt.subset_genes.bw", id=bam_base),#LibLabels=expand(bam_base),
-        genes=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gff.genes_2000.bed"
+        genes=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf.genes_2000.bed"
     output:
         out_matrix_region=visdir + "reproducible_peaks.ensgenes.rpkm.genebody.computeMatrix.gz",
         out_matrix_tss=visdir + "reproducible_peaks.ensgenes.rpkm.TSS.computeMatrix.gz",

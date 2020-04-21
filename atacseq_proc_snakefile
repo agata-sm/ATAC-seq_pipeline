@@ -546,6 +546,7 @@ rule featureCounts:
         """
 
 
+
 rule subset_bam_to_genes:
     input:
         bam=filtbamdir + "{id}.filt.bam",

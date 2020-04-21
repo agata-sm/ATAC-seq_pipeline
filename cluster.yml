@@ -51,7 +51,7 @@ MACS2:
 
 multiBamSummary_peaks:
   time: "04:00:00"
-  jobname: "multiBamSummary"
+  jobname: "multiBamSummary_peaks"
   N: 2
 
 subset_bam_to_genes:

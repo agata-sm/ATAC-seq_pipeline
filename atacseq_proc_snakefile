@@ -561,8 +561,6 @@ rule subset_bam_to_genes:
     
         TMPDIR="${{TMPDIR:-/tmp}}"
     
-        cd $TMPDIR
-
         samtools view -L {input.genes} -hbo $TMPDIR/{wildcards.id}.subset_genes.bam {input.bam}
         samtools index $TMPDIR/{wildcards.id}.subset_genes.bam
 

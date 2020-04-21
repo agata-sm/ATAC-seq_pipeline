@@ -523,7 +523,7 @@ rule annotate_peaks:
 rule featureCounts:
     input:
         bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
-        peaks_gff=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf",
+        peaks_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf",
         peaks_2k=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf.genes_2000.gtf"
     output:
         allpeaks_cnt = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",
@@ -536,7 +536,7 @@ rule featureCounts:
         module load subread/2.0.0
 
         featureCounts -s 0 -t gene -g gene_id \
-        -a {input.peaks_gff]} \
+        -a {input.peaks_gtf]} \
         -o {output.allpeaks_cnt} {input.bam}
 
 

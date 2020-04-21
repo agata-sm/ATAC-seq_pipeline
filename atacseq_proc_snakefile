@@ -536,7 +536,7 @@ rule featureCounts:
         module load subread/2.0.0
 
         featureCounts -s 0 -t gene -g gene_id \
-        -a {input.peaks_gtf]} \
+        -a {input.peaks_gtf} \
         -o {output.allpeaks_cnt} {input.bam}
 
 

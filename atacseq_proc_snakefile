@@ -535,12 +535,12 @@ rule featureCounts:
         module load bioinfo-tools
         module load subread/2.0.0
 
-        featureCounts -s 0 -t gene -g gene_id \
+        featureCounts -s 0 -t atacseq_peak -g peak_id \
         -a {input.peaks_gtf} \
         -o {output.allpeaks_cnt} {input.bam}
 
 
-        featureCounts -s 0 -t gene -g gene_id \
+        featureCounts -s 0 -t atacseq_peak -g peak_id \
         -a {input.peaks_2k} \
         -o {output.peaks_genes2k_cnt} {input.bam}
         """

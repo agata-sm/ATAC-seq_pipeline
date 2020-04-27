@@ -93,7 +93,9 @@ rule all:
         plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf",
         plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf",
         macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab",
-        visdir + "reproducible_peaks.ensgenes.rpkm.TSS.profile.pdf"
+        visdir + "reproducible_peaks.ensgenes.rpkm.TSS.profile.pdf",
+        peaks_gtf_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf" #annotated peaks within each replicate group
+
 
 
 rule filter_bam:
@@ -484,7 +486,10 @@ rule reproducible_peaks:
     input:
         expand(macs2dir + "{id}_peaks.bed", id=bam_base)
     output:
-        macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed"
+        main=macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed",
+        cond1=macs2dir + "reproducible_peaks/ctrl.reproducible_peaks.bed",
+        cond2=macs2dir + "reproducible_peaks/LPS6h.reproducible_peaks.bed",
+        cond3=macs2dir + "reproducible_peaks/LPS24h.reproducible_peaks.bed"
     shell:
         """
         module load bioinfo-tools
@@ -492,7 +497,7 @@ rule reproducible_peaks:
         module load BEDTools/2.27.1
     
         BEDs="$(dirname {input})"
-        Outdir="$(dirname {output})"
+        Outdir="$(dirname {output.main})"
 
         echo "$BEDs"
         echo "$Outdir"
@@ -500,7 +505,7 @@ rule reproducible_peaks:
         bash src/reproducible_peaks.sh
         """
 
-rule annotate_peaks:
+rule annotate_peaks_all:
     input:
         macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed"
     output:
@@ -510,7 +515,6 @@ rule annotate_peaks:
         genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.genes_2000.bed",
         genes_2k_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.genes_2000.gtf",
         genes_2k_padded=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.genes_2000.gene_coordinates_2500.bed"
-
     shell:
         """
         module load bioinfo-tools
@@ -520,6 +524,36 @@ rule annotate_peaks:
 
         perl src/peaks2gff_v2.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot} --outfile {output.peaks_gtf}
         """
+
+
+rule annotate_peaks_replicates:
+    input:
+        cond1=macs2dir + "reproducible_peaks/ctrl.reproducible_peaks.bed",
+        cond2=macs2dir + "reproducible_peaks/LPS6h.reproducible_peaks.bed",
+        cond3=macs2dir + "reproducible_peaks/LPS24h.reproducible_peaks.bed"
+    output:
+        annot_peaks_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.merged.GRCm38gene.bed",
+        annot_peaks_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.merged.GRCm38gene.bed",
+        annot_peaks_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.merged.GRCm38gene.bed",
+        
+
+        peaks_gtf_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf",
+        peaks_gtf_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.GRCm38gene.gtf",
+        peaks_gtf_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.GRCm38gene.gtf"
+    shell:
+        """
+        module load bioinfo-tools
+        module load BEDOPS/2.4.28
+        
+        closest-features --dist {input.cond1} {config[ensemblGene]} >{output.annot_peaks_ctrl}
+        closest-features --dist {input.cond2} {config[ensemblGene]} >{output.annot_peaks_6h}
+        closest-features --dist {input.cond3} {config[ensemblGene]} >{output.annot_peaks_24h}
+
+        perl src/peaks2gff_v2.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_ctrl} --outfile {output.peaks_gtf_ctrl}
+        perl src/peaks2gff_v2.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_6h} --outfile {output.peaks_gtf_6h}
+        perl src/peaks2gff_v2.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_24h} --outfile {output.peaks_gtf_24h}
+        """
+
 
 
 rule featureCounts:

@@ -627,9 +627,9 @@ rule profile_plots_genes_with_peaks:
         echo "labels used are"
         echo "$Lib_Labels"
 
-        computeMatrix reference-point -b 500 -a 500 --binSize 1 -p 1 -S {input.bw} --referencePoint TSS --samplesLabel $Lib_Labels -R {input.genes} -o ${output.out_matrix_tss}
+        computeMatrix reference-point -b 500 -a 500 --binSize 1 -p 1 -S {input.bw} --referencePoint TSS --samplesLabel $Lib_Labels -R {input.genes_2k_bed} -o ${output.out_matrix_tss}
 
-        computeMatrix scale-regions -b 500 -a 0 --binSize 1 -p 1 -S {input.bw} --samplesLabel $Lib_Labels -R {input.genes} -o {output.out_matrix_region}
+        computeMatrix scale-regions -b 500 -a 0 --binSize 1 -p 1 -S {input.bw} --samplesLabel $Lib_Labels -R {input.genes_2k_bed} -o {output.out_matrix_region}
 
         plotProfile -m {output.out_matrix_region} -out {output.out_profile_region} --plotType=lines --perGroup
         plotProfile -m {output.out_matrix_tss} -out {output.out_profile_tss} --plotType=lines --perGroup

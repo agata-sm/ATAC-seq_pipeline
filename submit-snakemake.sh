@@ -12,5 +12,6 @@ snakemake \
                   -p {cluster.partition} \
                   -n {cluster.N} \
                   -J {cluster.jobname}"
+    -n -R `snakemake --list-code-changes`
 
 

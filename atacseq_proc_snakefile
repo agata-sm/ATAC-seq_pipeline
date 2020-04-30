@@ -92,9 +92,9 @@ rule all:
         expand(plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k3.pdf", id=bam_base),
         plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf",
         plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf",
-        macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab",
         visdir + "reproducible_peaks.ensgenes.rpkm.TSS.profile.pdf",
-        peaks_gtf_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf" #annotated peaks within each replicate group
+        macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf", #annotated peaks within each replicate group
+        macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab"
 
 
 

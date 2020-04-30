@@ -274,8 +274,8 @@ sub get_gene {
 	my $peak_dist=$_[6];
 	my $padded_dist=$_[7];
 
-	my $gene_coords="$gene_start::$gene_end";
-	my $gtf_peaks_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_coordinates $gene_coords; gene_strand $gene_strand; gene_biotype $gene_biotype; gene_dist $gene_dist; peak_midpnt: $peak_midpnt; TSS_dist $TSS_dist";
+	#my $gene_coords="$gene_start::$gene_end";
+	my $gtf_peaks_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_strand $gene_strand; gene_biotype $gene_biotype; gene_dist $gene_dist; peak_midpnt: $peak_midpnt; TSS_dist $TSS_dist";
 
 	print OUTFILE_GTF_PEAKS "$gtf_peaks_line1\t$gtf_peaks_line2\n";
 

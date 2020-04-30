@@ -97,7 +97,6 @@ rule all:
         macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab"
 
 
-
 rule filter_bam:
     input:
         datadir + "{id}.bam"
@@ -515,7 +514,7 @@ rule annotate_peaks_all:
         genes_2k_bed=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.genes.gene_dist_2000.bed",
         genes_2k_gtf=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.genes.gene_dist_2000.gtf",
         genes_2k_padded=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.genes.gene_dist_2000.gene_coordinates_2500.bed",
-        peaks_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.gtf",
+        peaks_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.tss.gtf",
         peaks_2k_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf",
         genes_2k_bed_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.genes.TSS_dist_2000.bed",
         genes_2k_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.genes.TSS_dist_2000.gtf",
@@ -567,7 +566,7 @@ rule featureCounts:
         bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
         peaks_gtf_gene=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.gtf",
         peaks_2k_gtf_gene=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.peaks.gene_dist_2000.gtf",
-        peaks_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.gtf",
+        peaks_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.tss.gtf",
         peaks_2k_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf",
     output:
         allpeaks_cnt_gene = macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",

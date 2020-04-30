@@ -510,11 +510,17 @@ rule annotate_peaks_all:
         macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed"
     output:
         annot=macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
-        peaks_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf",
-        peaks_2k_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.peaks_2000.gtf",
-        genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.genes_2000.bed",
-        genes_2k_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.genes_2000.gtf",
-        genes_2k_padded=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.genes_2000.gene_coordinates_2500.bed"
+        peaks_gtf=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.gtf",
+        peaks_2k_gtf=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.peaks.gene_dist_2000.gtf",
+        genes_2k_bed=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.genes.gene_dist_2000.bed",
+        genes_2k_gtf=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.genes.gene_dist_2000.gtf",
+        genes_2k_padded=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.genes.gene_dist_2000.gene_coordinates_2500.bed",
+        peaks_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.gtf",
+        peaks_2k_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf",
+        genes_2k_bed_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.genes.TSS_dist_2000.bed",
+        genes_2k_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.genes.TSS_dist_2000.gtf",
+        genes_2k_padded_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.genes.TSS_dist_2000.gene_coordinates_2500.bed",
+      
     shell:
         """
         module load bioinfo-tools
@@ -522,7 +528,9 @@ rule annotate_peaks_all:
         
         closest-features --dist {input} {config[ensemblGene]} >{output.annot}
 
-        perl src/peaks2gff_v2.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot} --outfile {output.peaks_gtf}
+        perl src/peaks2gff_v2.2.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot} --outfile {output.peaks_gtf}
+
+        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot} --outfile {output.peaks_gtf_tss}
         """
 
 
@@ -535,8 +543,6 @@ rule annotate_peaks_replicates:
         annot_peaks_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.merged.GRCm38gene.bed",
         annot_peaks_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.merged.GRCm38gene.bed",
         annot_peaks_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.merged.GRCm38gene.bed",
-        
-
         peaks_gtf_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf",
         peaks_gtf_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.GRCm38gene.gtf",
         peaks_gtf_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.GRCm38gene.gtf"
@@ -549,9 +555,9 @@ rule annotate_peaks_replicates:
         closest-features --dist {input.cond2} {config[ensemblGene]} >{output.annot_peaks_6h}
         closest-features --dist {input.cond3} {config[ensemblGene]} >{output.annot_peaks_24h}
 
-        perl src/peaks2gff_v2.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_ctrl} --outfile {output.peaks_gtf_ctrl}
-        perl src/peaks2gff_v2.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_6h} --outfile {output.peaks_gtf_6h}
-        perl src/peaks2gff_v2.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_24h} --outfile {output.peaks_gtf_24h}
+        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_ctrl} --outfile {output.peaks_gtf_ctrl}
+        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_6h} --outfile {output.peaks_gtf_6h}
+        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_24h} --outfile {output.peaks_gtf_24h}
         """
 
 
@@ -559,26 +565,31 @@ rule annotate_peaks_replicates:
 rule featureCounts:
     input:
         bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
-        peaks_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.gtf",
-        peaks_2k_gtf=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.peaks_2000.gtf",
+        peaks_gtf_gene=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.gtf",
+        peaks_2k_gtf_gene=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.peaks.gene_dist_2000.gtf",
+        peaks_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.gtf",
+        peaks_2k_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf",
     output:
-        allpeaks_cnt = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",
-        allpeaks_log = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab.summary",
-        peaks_genes2k_cnt = macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab",
-        peaks_genes2k_log =macs2dir + "annotated_reproducible_peaks/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab.summary"
+        allpeaks_cnt_gene = macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",
+        allpeaks_log_gene = macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab.summary",
+        peaks_genes2k_cnt_gene = macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab",
+        peaks_genes2k_log_gene =macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab.summary"
+
+        allpeaks_cnt_gene = macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",
+        allpeaks_log_gene = macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab.summary",
+        peaks_genes2k_cnt_gene = macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.tss2k.fCounts.tab",
+        peaks_genes2k_log_gene =macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.tss2k.fCounts.tab.summary"
+
     shell:
         """
         module load bioinfo-tools
         module load subread/2.0.0
 
-        featureCounts -s 0 -t atacseq_peak -g peak_id \
-        -a {input.peaks_gtf} \
-        -o {output.allpeaks_cnt} {input.bam}
-
-
-        featureCounts -s 0 -t atacseq_peak -g peak_id \
-        -a {input.peaks_2k_gtf} \
-        -o {output.peaks_genes2k_cnt} {input.bam}
+        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_gene} -o {output.allpeaks_cnt_gene} {input.bam}
+        featureCounts -s 0 -t atacseq_peak -g peak_id -a {input.peaks_2k_gtf_gene} -o {output.peaks_genes2k_cnt_gene} {input.bam}
+    
+        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_tss} -o {output.allpeaks_cnt_tss} {input.bam}
+        featureCounts -s 0 -t atacseq_peak -g peak_id -a {input.peaks_2k_gtf_tss} -o {output.peaks_genes2k_cnt_tss} {input.bam}
         """
 
 
@@ -586,7 +597,7 @@ rule featureCounts:
 rule subset_bam_to_genes:
     input:
         bam=filtbamdir + "{id}.filt.bam",
-        genes_2k_padded=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.genes_2000.gene_coordinates_2500.bed"
+        genes_2k_padded=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.genes.gene_dist_2000.gene_coordinates_2500.bed"
     output:
         temp(tempdir + "{id}.filt.subset_genes.bw")
     shell:
@@ -609,7 +620,7 @@ rule subset_bam_to_genes:
 rule profile_plots_genes_with_peaks:
     input:
         bw=expand(tempdir + "{id}.filt.subset_genes.bw", id=bam_base),#LibLabels=expand(bam_base),
-        genes_2k_bed=macs2dir + "annotated_reproducible_peaks/reproduciblepeaks.GRCm38gene.genes_2000.bed"
+        genes_2k_bed=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.genes.gene_dist_2000.bed"
     output:
         out_matrix_region=visdir + "reproducible_peaks.ensgenes.rpkm.genebody.computeMatrix.gz",
         out_matrix_tss=visdir + "reproducible_peaks.ensgenes.rpkm.TSS.computeMatrix.gz",
@@ -634,8 +645,6 @@ rule profile_plots_genes_with_peaks:
         plotProfile -m {output.out_matrix_region} -out {output.out_profile_region} --plotType=lines --perGroup
         plotProfile -m {output.out_matrix_tss} -out {output.out_profile_tss} --plotType=lines --perGroup
         """
-
-
 
 
 

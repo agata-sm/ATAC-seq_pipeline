@@ -18,7 +18,7 @@ use diagnostics;
 use Getopt::Long;
 
 
-my $script_name="peaks2gff_v2.pl";
+my $script_name="peaks2gff_v2.2.pl";
 
 
 if ($ARGV[0]eq qw '-h'){
@@ -37,25 +37,43 @@ else{
 	#commandline parsing for parameters
 	GetOptions(
 		'infile=s'		=>	\(my $infile),
-		'outfile_gtf=s'		=>	\(my $outfile_gtf),
+		'outfile_gtf=s'		=>	\(my $outfile_gtf_all_peaks),
 		'peak_distance=s'		=>	\(my $peak_dist),
 		'gene_coord_distance=s'		=>	\(my $padded_dist)
 	) or die "Error in command line arguments";
 
+	my $outfile_gtf_base;
+	if ($outfile_gtf_all_peaks=~m/(.+).gtf/){
+		$outfile_gtf_base=$1;
+	}else{
+		print "outfile_gtf file name does not have a gtf extension. Please provide a valid name.";
+		print "arguments:\n";
+		print "--infile: /path/to/annotated_peaks.bed\n";
+		print "--outfile_gtf: /path/to/gtf\n";
+		print "--peak_distance: cutoff distance gene to the annotated peak\n";
+		print "--gene_coord_distance: distance added to genomic coordinates on gene 5'end (upstream of TSS) for genes selected by --peak_distance\n";
+		exit;
+	}
 
 	#outfile info contains more info on genes annotated to peaks
-	my $outfile_info="$outfile_gtf\_genes_info.tab"; 
-	my $outfile_bed_genes="$outfile_gtf\.genes_$peak_dist\.bed";
-	my $outfile_gtf_genes="$outfile_gtf\.genes_$peak_dist\.gtf";
+	my $outfile_info="$outfile_gtf_base\_genes_info.tab"; 
+	
+	#outfile_gtf_CO_peaks coordinates of PEAKS within 2kh of genes
+	my $outfile_gtf_CO_peaks="$outfile_gtf_base\.peaks\.gene_dist_$peak_dist\.gtf";
 
-	my $outfile_bed_padded_genes="$outfile_gtf\.genes_$peak_dist\.gene_coordinates_$padded_dist\.bed";
+	#outfiles with gene coordinates
+	my $outfile_bed_genes="$outfile_gtf_base\.genes\.gene_dist_$peak_dist\.bed";
+	my $outfile_gtf_genes="$outfile_gtf_base\.genes\.gene_dist_$peak_dist\.gtf";
+
+	#outfile with gene coordinates padded (gene_coord_distance) on the TSS side (5´of the gene in + and 3' of the gene on -)
+	my $outfile_bed_padded_genes="$outfile_gtf_base\.genes\.gene_dist_$peak_dist\.gene_coordinates_$padded_dist\.bed";
 
 	open (INFILE, "<","$infile") or die "Cannot open input file $infile: $!"; 
 
-	open (OUTFILE_GTF, ">","$outfile_gtf") or die "Cannot open output file $outfile_gtf: $!"; 
+	open (OUTFILE_GTF_PEAKS, ">","$outfile_gtf_all_peaks") or die "Cannot open output file $outfile_gtf_all_peaks: $!"; 
+	open (OUTFILE_GTF_PEAKS_CO, ">","$outfile_gtf_CO_peaks") or die "Cannot open output file $outfile_gtf_CO_peaks: $!"; 
 	open (OUTFILE_INFO, ">","$outfile_info") or die "Cannot open output file $outfile_info: $!"; 
-
-	my $header_info="peakid\tchr\tstart\tend\tensembl_gene_5\tname_gene_5\tbiotype_gene_5\tdistance_gene_5\tensembl_gene_3\tname_gene_3\tdistance_gene_3\tbiotype_gene_3";
+	my $header_info="peakid\tchr\tstart\tend\tensembl_gene_5\tname_gene_5\tdistance_gene_5\tbiotype_gene_5\tensembl_gene_3\tname_gene_3\tdistance_gene_3\tbiotype_gene_3";
 	print OUTFILE_INFO "$header_info\n";
 
 	open (OUTFILE_BED_GENES, ">", "$outfile_bed_genes") or die "Cannot open output file $outfile_bed_genes: $!";
@@ -85,6 +103,7 @@ else{
 		my $gtf_line1="$peak_bed[0]\tmacs2\tatacseq_peak\t$start\t$peak_bed[2]\t.\t.\t.";
 		
 
+
 		my $dist;
 		my $gene_id;
 		my $gene_name;
@@ -97,6 +116,7 @@ else{
 		my $gene3_id;
 		my $gene3_name;
 		my $gene3_biotype;
+
 
 
 		if ( ($dist5 ne qw /NA/) && ($dist3 ne qw /NA/) ) {
@@ -132,11 +152,12 @@ else{
 				$gene_id=$gene5_id;
 				$gene_name=$gene5_name;
 				$gene_biotype=$gene5_biotype;
+				my $gtf_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_biotype $gene_biotype; gene_dist $dist";
 
-				if ($dist5<$peak_dist){
+				if (abs($dist5)<=$peak_dist){
 					print OUTFILE_BED_GENES "$gene5\n";
 					my $gene_start_gtf=$gene5_start+1;
-					my $gtf_line_gene="$gene5_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene5_end\t.\t$gene5_strand\t.\t$gene5_attr";
+					my $gtf_line_gene="$gene5_chr\tensembl\tgene_atacseq_peak_2kb\t$gene_start_gtf\t$gene5_end\t.\t$gene5_strand\t.\t$gene5_attr";
 					print OUTFILE_GTF_GENES "$gtf_line_gene\n";
 
 					#padded gene coordinates
@@ -150,6 +171,8 @@ else{
 
 					my $line_padded_genes_bed=join("\t",@gene_bed);
 					print OUTFILE_BED_PADDED_GENES "$line_padded_genes_bed\n";
+					print OUTFILE_GTF_PEAKS_CO "$gtf_line1\t$gtf_line2\n";
+
 				}
 
 			}elsif (abs($dist3)<abs($dist5)) {
@@ -157,11 +180,12 @@ else{
 				$gene_id=$gene3_id;
 				$gene_name=$gene3_name;
 				$gene_biotype=$gene3_biotype;
+				my $gtf_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_biotype $gene_biotype; gene_dist $dist";
 
-				if ($dist3<$peak_dist){
+				if (abs($dist3)<$peak_dist){
 					print OUTFILE_BED_GENES "$gene3\n";
 					my $gene_start_gtf=$gene3_start+1;
-					my $gtf_line_gene="$gene3_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene3_end\t.\t$gene3_strand\t.\t$gene3_attr";
+					my $gtf_line_gene="$gene3_chr\tensembl\tgene_atacseq_peak_2kb\t$gene_start_gtf\t$gene3_end\t.\t$gene3_strand\t.\t$gene3_attr";
 					print OUTFILE_GTF_GENES "$gtf_line_gene\n";
 
 					#padded gene coordinates
@@ -175,6 +199,8 @@ else{
 
 					my $line_padded_genes_bed=join("\t",@gene_bed);
 					print OUTFILE_BED_PADDED_GENES "$line_padded_genes_bed\n";
+
+					print OUTFILE_GTF_PEAKS_CO "$gtf_line1\t$gtf_line2\n";
 
 				}
 
@@ -190,16 +216,20 @@ else{
 
 				$gene_name="$gene5_name\_$gene3_name";
 
-				if ($dist3<$peak_dist){
+				if (abs($dist3)<=$peak_dist){
 					print OUTFILE_BED_GENES "$gene3\n";
 					print OUTFILE_BED_GENES "$gene5\n";
 					my $gene_start_gtf=$gene3_start+1;
-					my $gtf_line_gene1="$gene3_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene3_end\t.\t$gene3_strand\t.\t$gene3_attr";
+					my $gtf_line_gene1="$gene3_chr\tensembl\tgene_atacseq_peak_2kb\t$gene_start_gtf\t$gene3_end\t.\t$gene3_strand\t.\t$gene3_attr";
 					print OUTFILE_GTF_GENES "$gtf_line_gene1\n";
 
 					my $gene_start_gtf2=$gene5_start+1;
-					my $gtf_line_gene2="$gene5_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene5_end\t.\t$gene5_strand\t.\t$gene5_attr";
+					my $gtf_line_gene2="$gene5_chr\tensembl\tgene_atacseq_peak_2kb\t$gene_start_gtf\t$gene5_end\t.\t$gene5_strand\t.\t$gene5_attr";
 					print OUTFILE_GTF_GENES "$gtf_line_gene2\n";
+
+
+					my $gtf_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_biotype $gene_biotype; gene_dist $dist";
+					print OUTFILE_GTF_PEAKS_CO "$gtf_line1\t$gtf_line2\n";
 
 
 					#padded gene coordinates
@@ -254,10 +284,10 @@ else{
 			$gene5_biotype="NA";
 
 
-			if ($dist<$peak_dist){
+			if (abs($dist)<=$peak_dist){
 				print OUTFILE_BED_GENES "$gene3\n";
 				my $gene_start_gtf=$gene3_start+1;
-				my $gtf_line_gene="$gene3_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene3_end\t.\t$gene3_strand\t.\t$gene3_attr";
+				my $gtf_line_gene="$gene3_chr\tensembl\tgene_atacseq_peak_2kb\t$gene_start_gtf\t$gene3_end\t.\t$gene3_strand\t.\t$gene3_attr";
 				print OUTFILE_GTF_GENES "$gtf_line_gene\n";
 
 				#padded gene coordinates
@@ -271,6 +301,9 @@ else{
 
 				my $line_padded_genes_bed=join("\t",@gene_bed);
 				print OUTFILE_BED_PADDED_GENES "$line_padded_genes_bed\n";
+
+				my $gtf_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_biotype $gene_biotype; gene_dist $dist";
+				print OUTFILE_GTF_PEAKS_CO "$gtf_line1\t$gtf_line2\n";
 
 			}
 
@@ -297,10 +330,10 @@ else{
 			$gene3_biotype="NA";
 
 
-			if ($dist<$peak_dist){
+			if (abs($dist)<=$peak_dist){
 				print OUTFILE_BED_GENES "$gene5\n";
 				my $gene_start_gtf=$gene5_start+1;
-				my $gtf_line_gene="$gene5_chr\tgene\tatacseq_peak\t$gene_start_gtf\t$gene5_end\t.\t$gene5_strand\t.\t$gene5_attr";
+				my $gtf_line_gene="$gene5_chr\tensembl\tgene_atacseq_peak_2kb_atacseq_peak\t$gene_start_gtf\t$gene5_end\t.\t$gene5_strand\t.\t$gene5_attr";
 				print OUTFILE_GTF_GENES "$gtf_line_gene\n";
 
 				#padded gene coordinates
@@ -315,16 +348,19 @@ else{
 				my $line_padded_genes_bed=join("\t",@gene_bed);
 				print OUTFILE_BED_PADDED_GENES "$line_padded_genes_bed\n";
 
+				my $gtf_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_biotype $gene_biotype; gene_dist $dist";
+				print OUTFILE_GTF_PEAKS_CO "$gtf_line1\t$gtf_line2\n";
+
+
 
 			}
 
 		
 		}
 
-		my $gtf_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_biotype $gene_biotype";
+		my $gtf_line2_b="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_biotype $gene_biotype; gene_dist $dist";
 
-
-		print OUTFILE_GTF "$gtf_line1\t$gtf_line2\n";
+		print OUTFILE_GTF_PEAKS "$gtf_line1\t$gtf_line2_b\n";
 
 		print OUTFILE_INFO "$peak_name\t$peak_bed[0]\t$start\t$peak_bed[2]\t$gene5_id\t$gene5_name\t$dist5\t$gene5_biotype\t$gene3_id\t$gene3_name\t$dist3\t$gene3_biotype\n";
 
@@ -338,7 +374,8 @@ else{
 
 close(INFILE);
 close(OUTFILE_INFO);
-close(OUTFILE_GTF);
+close(OUTFILE_GTF_PEAKS);
+close(OUTFILE_GTF_PEAKS_CO);
 close(OUTFILE_GTF_GENES);
 close(OUTFILE_BED_GENES);
 close(OUTFILE_BED_PADDED_GENES);

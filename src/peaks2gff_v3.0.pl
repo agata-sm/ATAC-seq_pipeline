@@ -274,8 +274,7 @@ sub get_gene {
 	my $peak_dist=$_[6];
 	my $padded_dist=$_[7];
 
-	#my $gene_coords="$gene_start::$gene_end";
-	my $gtf_peaks_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_strand $gene_strand; gene_biotype $gene_biotype; gene_dist $gene_dist; peak_midpnt: $peak_midpnt; TSS_dist $TSS_dist";
+	my $gtf_peaks_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_strand $gene_strand; gene_biotype $gene_biotype; gene_dist $gene_dist; TSS_dist $TSS_dist";
 
 	print OUTFILE_GTF_PEAKS "$gtf_peaks_line1\t$gtf_peaks_line2\n";
 
@@ -348,11 +347,11 @@ sub get_2_genes {
 	my $gene_biotype="$gene5_biotype\_$gene3_biotype";
 	my $gene_name="$gene5_name\_$gene3_name";
 	my $gene_strand="$gene5_strand\_$gene3_strand";
-	#my $gene_coords="$gene5_start::$gene5_end\_$gene3_start::$gene3_end";
 	my $gene_dist="$gene5_dist\_$gene3_dist";
-	my $TSS_dist=$TSS5_dist;
+	my $TSS_dist=$TSS3_dist;
 
-	my $gtf_peaks_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_strand $gene_strand; gene_biotype $gene_biotype; gene_dist $gene_dist; peak_midpnt: $peak_midpnt; TSS_dist $TSS_dist";
+	my $gtf_peaks_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_strand $gene_strand; gene_biotype $gene_biotype; gene_dist $gene_dist; TSS_dist $TSS_dist";
+
 
 	print OUTFILE_GTF_PEAKS "$gtf_peaks_line1\t$gtf_peaks_line2\n";
 
@@ -369,7 +368,6 @@ sub get_2_genes {
 		my $gtf_line_gene5="$gene5_chr\tensembl\tgene_atacseq_peak_2kb\t$gene_start_gtf5\t$gene5_end\t.\t$gene5_strand\t.\t$gene5_attr";
 		print OUTFILE_GTF_GENES "$gtf_line_gene5\n";
 
-#		my $gtf_peaks_line2="peak_id $peak_name; gene_id $gene_id; gene_name $gene_name; gene_coordinates $gene_coords; gene_strand $gene_strand; gene_biotype $gene_biotype; gene_dist $dist; peak_midpnt: $peak_midpnt; TSS_dist $TSS_dist";
 		print OUTFILE_GTF_PEAKS_CO "$gtf_peaks_line1\t$gtf_peaks_line2\n";
 
 

@@ -574,10 +574,10 @@ rule featureCounts:
         allpeaks_log_gene = macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab.summary",
         peaks_genes2k_cnt_gene = macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab",
         peaks_genes2k_log_gene =macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab.summary",
-        allpeaks_cnt_gene = macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",
-        allpeaks_log_gene = macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab.summary",
-        peaks_genes2k_cnt_gene = macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.tss2k.fCounts.tab",
-        peaks_genes2k_log_gene =macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.tss2k.fCounts.tab.summary"
+        allpeaks_cnt_tss = macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab",
+        allpeaks_log_tss = macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab.summary",
+        peaks_genes2k_cnt_tss = macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.tss2k.fCounts.tab",
+        peaks_genes2k_log_tss =macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/count_table_peaks/count_table.reproduciblepeaks.tss2k.fCounts.tab.summary"
 
     shell:
         """

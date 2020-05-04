@@ -518,7 +518,7 @@ rule annotate_peaks_all:
         peaks_2k_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.tss.peaks.TSS_dist_2000.gtf",
         genes_2k_bed_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.tss.genes.TSS_dist_2000.bed",
         genes_2k_gtf_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.tss.genes.TSS_dist_2000.gtf",
-        genes_2k_padded_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.tss.genes.TSS_dist_2000.gene_coordinates_2500.bed",
+        genes_2k_padded_tss=macs2dir + "annotated_reproducible_peaks/selected_TSS_dist/reproduciblepeaks.GRCm38gene.tss.genes.TSS_dist_2000.gene_coordinates_2500.bed"
       
     shell:
         """

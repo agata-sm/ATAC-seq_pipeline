@@ -580,9 +580,9 @@ rule annotate_peaks_replicates:
         cond2=macs2dir + "reproducible_peaks/LPS6h.reproducible_peaks.bed",
         cond3=macs2dir + "reproducible_peaks/LPS24h.reproducible_peaks.bed"
     output:
-        annot_peaks_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.merged.GRCm38gene.bed",
-        annot_peaks_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.merged.GRCm38gene.bed",
-        annot_peaks_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.merged.GRCm38gene.bed",
+        annot_peaks_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.merged.GRCm38gene.gtf",
+        annot_peaks_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.merged.GRCm38gene.gtf",
+        annot_peaks_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.merged.GRCm38gene.gtf",
         peaks_gtf_ctrl_2k=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf",
         peaks_gtf_6h_2k=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf",
         peaks_gtf_24h_2k=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf"

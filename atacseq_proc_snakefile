@@ -77,31 +77,48 @@ bam_base = [s.replace(datadir, '') for s in bam_base]
 #####################
 
 
+# rule all:
+#     input:
+#         resdir + "rulegraph.png",
+#         resdir + "dag.png",
+#         expand(filtbamdirstats + "{id}.filt.stats", id=bam_base),
+#         expand(xcordir + "{id}.xcor.metrics.txt", id=bam_base),
+#         deeptoolsdir_plots + "CorrSpearman_bin5k.pdf",
+#         deeptoolsdir_plots + "bamFingerprint.pdf",
+#         expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
+#         deeptoolsdir_plots + "CorrSpearman_peaks.pdf",
+#         expand(macs2dir + "{id}_peaks.xls", id=bam_base),
+#         macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
+#         expand(plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k3.pdf", id=bam_base),
+#         plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf",
+#         plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf",
+#         visdir + "reproducible_peaks.ensgenes.rpkm.TSS.profile.pdf",
+#         macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf", #annotated peaks within each replicate group
+#         macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab",
+#         cnts_ctrl_all=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/count_table_peaks/ctrl.count_table.allpeaks.fCounts.tab"
+
 rule all:
     input:
         resdir + "rulegraph.png",
-        resdir + "dag.png",
-        expand(filtbamdirstats + "{id}.filt.stats", id=bam_base),
+        log_st_stats=expand(filtbamdirstats + "{id}.filt.stats", id=bam_base),
         expand(xcordir + "{id}.xcor.metrics.txt", id=bam_base),
         deeptoolsdir_plots + "CorrSpearman_bin5k.pdf",
         deeptoolsdir_plots + "bamFingerprint.pdf",
-        expand(covdir1x + "{id}.norm1x.bw", id=bam_base),
+        ens_gene_1x_hm= plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf", #rule plotHeatmap_EnsGene
+        ens_gene_1x_profile= plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf", #rule plotProfile_EnsGene:
+        ens_gene_1x_hm_samples=expand(plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k3.pdf", id=bam_base), #rule plotHeatmap_samples:
         deeptoolsdir_plots + "CorrSpearman_peaks.pdf",
-        expand(macs2dir + "{id}_peaks.xls", id=bam_base),
         macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
-        expand(plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k3.pdf", id=bam_base),
-        plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf",
-        plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf",
-        visdir + "reproducible_peaks.ensgenes.rpkm.TSS.profile.pdf",
-        macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf", #annotated peaks within each replicate group
-        macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.genes2k.fCounts.tab"
+        allpeaks_cnt_gene = macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab", #rule featureCounts_reprodPeaks:
+        cnts_ctrl_all=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/count_table_peaks/ctrl.count_table.allpeaks.fCounts.tab", #rule featureCounts_replicates:
+        out_profile_tss=visdir + "reproducible_peaks.ensgenes.rpkm.TSS.profile.pdf" #rule profile_plots_sel_genes:
 
 
 rule filter_bam:
     input:
         datadir + "{id}.bam"
     output:
-        filt= filtbamdir + "{id}.filt.bam",
+        filt=protected(filtbamdir + "{id}.filt.bam"),
         log_st_flagstat= rawbamdirstats + "{id}.raw.flagstat",
         log_st_idxstats= rawbamdirstats + "{id}.raw.idxstats",
         log_st_stats= rawbamdirstats + "{id}.raw.stats",
@@ -216,7 +233,7 @@ rule multiBamSummary:
         for b_idx in {input.bai}; do touch $b_idx; done
 
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
 
         multiBamSummary bins --bamfiles {input.bam} --outFileName {output} --binSize=5000 --numberOfProcessors=4 --extendReads={config[extSize]}
         """
@@ -229,7 +246,7 @@ rule plotCorrelation:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
 
         plotCorrelation --corData {input} --corMethod spearman --whatToPlot heatmap --plotFile {output} \
             --skipZeros --plotFileFormat pdf --plotNumbers
@@ -243,7 +260,7 @@ rule plotFingerprint:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
 
         plotFingerprint --bamfiles {input} --extendReads {config[extSize]} --binSize=1000 --plotFile {output} --numberOfProcessors=1
         """
@@ -253,10 +270,10 @@ rule bamCoverage:
         bam=filtbamdir + "{id}.filt.bam",
         bai=filtbamdir + "{id}.filt.bam.bai"
     output:
-         bw1x= covdir1x + "{id}.norm1x.bw",
-         bg1x= covdir1x + "{id}.norm1x.bg",
-         bwCPM= covdirCPM + "{id}.normCPM.bw",
-         bgCPM= covdirCPM + "{id}.normCPM.bg"
+        bw1x= protected(covdir1x + "{id}.norm1x.bw"),
+        bg1x= protected(covdir1x + "{id}.norm1x.bg"),
+        bwCPM= protected(covdirCPM + "{id}.normCPM.bw"),
+        bgCPM= protected(covdirCPM + "{id}.normCPM.bg")
 
 
     shell:
@@ -264,15 +281,12 @@ rule bamCoverage:
         touch {input.bai}
 
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
 
         bamCoverage --bam {input.bam} --outFileName {output.bw1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization X Y MT -p 5
-
         bamCoverage --bam {input.bam} --outFileName {output.bg1x} --normalizeUsing RPGC --effectiveGenomeSize {config[efGenomeSize]} --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization X Y MT -p 5
 
-
         bamCoverage --bam {input.bam} --outFileName {output.bwCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bigwig --ignoreForNormalization X Y MT -p 5
-
         bamCoverage --bam {input.bam} --outFileName {output.bgCPM} --normalizeUsing CPM --extendReads {config[extSize]} --binSize 50 --outFileFormat bedgraph --ignoreForNormalization X Y MT -p 5
 
         """
@@ -292,20 +306,18 @@ rule computeMatrix_EnsGene:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
 
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 10 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_tss_1x}
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_tss_1x}
+        computeMatrix scale-regions -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_gene_1x}
 
-        computeMatrix scale-regions -b 1000 -a 1000 --binSize 5 -p 10 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_gene_1x}
-
-        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 10 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_tss_cpm}
-
-        computeMatrix scale-regions -b 1000 -a 1000 --binSize 5 -p 10 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_gene_cpm}
+        computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_tss_cpm}
+        computeMatrix scale-regions -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cpm} -R {config[ensemblGene]} -o {output.ens_gene_cpm}
 
         """
 
 
-rule plotHeatmap:
+rule plotHeatmap_EnsGene:
     input:
         ens_gene_1x= matrixDir_1x + "ensGene.gene.cov1x.computeMatrix.gz",
         ens_tss_1x= matrixDir_1x + "ensGene.TSS.cov1x.computeMatrix.gz",
@@ -320,7 +332,7 @@ rule plotHeatmap:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
         
         plotHeatmap --matrixFile {input.ens_gene_1x} --outFileName {output.ens_gene_1x} --kmeans 4 --sortRegions descend --sortUsing median
         plotHeatmap --matrixFile {input.ens_tss_1x} --outFileName {output.ens_tss_1x} --kmeans 4 --sortRegions descend --sortUsing median
@@ -329,7 +341,7 @@ rule plotHeatmap:
         """
 
 
-rule plotProfile:
+rule plotProfile_EnsGene:
     input:
         ens_gene_1x= matrixDir_1x + "ensGene.gene.cov1x.computeMatrix.gz",
         ens_tss_1x= matrixDir_1x + "ensGene.TSS.cov1x.computeMatrix.gz",
@@ -344,7 +356,7 @@ rule plotProfile:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
 
         plotProfile -m {input.ens_gene_1x} -out {output.ens_gene_1x} --plotType=lines --perGroup
         plotProfile -m {input.ens_tss_1x} -out {output.ens_tss_1x} --plotType=lines --perGroup
@@ -367,7 +379,7 @@ rule computeMatrix_samples:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
 
         computeMatrix reference-point -b 1000 -a 1000 --binSize 5 -p 2 -S {input.cov1x} -R {config[ensemblGene]} -o {output.ens_TSS_1x}
 
@@ -393,7 +405,7 @@ rule plotHeatmap_samples:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
         
         plotHeatmap --matrixFile {input.ens_TSS_1x} --outFileName {output.ens_tss_1x_k3} --kmeans 3 --sortRegions descend --sortUsing median
         plotHeatmap --matrixFile {input.ens_TSS_1x} --outFileName {output.ens_tss_1x_k4} --kmeans 4 --sortRegions descend --sortUsing median
@@ -411,7 +423,7 @@ rule MACS2:
         xls= macs2dir + "{id}_peaks.xls",
         narrowPeak= macs2dir + "{id}_peaks.narrowPeak",
         bed= macs2dir + "{id}_peaks.bed",
-        tmp_bed = macs2dir + "{id}_peaks.tmp.bed"
+        tmp_bed = temporary(macs2dir + "{id}_peaks.tmp.bed")
 
     shell:
         """
@@ -426,7 +438,6 @@ rule MACS2:
 
         module load BEDOPS/2.4.28
         sort-bed {output.tmp_bed} > {output.bed}
-
         """
 
 
@@ -454,7 +465,7 @@ rule multiBamSummary_peaks:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
 
         echo {input.bam}
     
@@ -472,7 +483,7 @@ rule plotCorrelation_peaks:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
 
         plotCorrelation --corData {input} --corMethod spearman --whatToPlot heatmap --plotFile {output} \
             --skipZeros --plotFileFormat pdf --plotNumbers
@@ -504,7 +515,7 @@ rule reproducible_peaks:
         bash src/reproducible_peaks.sh
         """
 
-rule annotate_peaks_all:
+rule annotate_peaks_reprodPeaks:
     input:
         macs2dir + "reproducible_peaks/all.reproduciblepeaks.merged.bed"
     output:
@@ -534,7 +545,7 @@ rule annotate_peaks_all:
 
 
 
-rule featureCounts:
+rule featureCounts_reprodPeaks:
     input:
         bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
         peaks_gtf_gene=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.gtf",
@@ -635,7 +646,7 @@ rule subset_bam_to_genes:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
         module load samtools/1.9
     
         TMPDIR="${{TMPDIR:-/tmp}}"
@@ -645,11 +656,11 @@ rule subset_bam_to_genes:
     
         ls $TMPDIR
 
-        bamCoverage --normalizeUsing RPKM --exactScaling --extendReads 200 --binSize 1 --outFileFormat bigwig -p 2 --bam $TMPDIR/{wildcards.id}.subset_genes.bam --outFileName {output}
+        bamCoverage --normalizeUsing RPKM --exactScaling --extendReads 200 --binSize 1 --outFileFormat bigwig -p 1 --bam $TMPDIR/{wildcards.id}.subset_genes.bam --outFileName {output}
         """
 
 
-rule profile_plots_genes_with_peaks:
+rule profile_plots_sel_genes:
     input:
         bw=expand(tempdir + "{id}.filt.subset_genes.bw", id=bam_base),#LibLabels=expand(bam_base),
         genes_2k_bed=macs2dir + "annotated_reproducible_peaks/selected_gene_dist/reproduciblepeaks.GRCm38gene.genes.gene_dist_2000.bed"
@@ -661,7 +672,7 @@ rule profile_plots_genes_with_peaks:
     shell:
         """
         module load bioinfo-tools
-        module load deepTools/3.1.0
+        module load deepTools/3.3.2
         
         computeMatrix reference-point -b 500 -a 500 --binSize 1 -p 1 -S {input.bw} --referencePoint TSS --smartLabels -R {input.genes_2k_bed} -o ${output.out_matrix_tss}
 

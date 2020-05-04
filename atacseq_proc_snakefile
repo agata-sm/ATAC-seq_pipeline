@@ -631,10 +631,10 @@ rule featureCounts_replicates:
         featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_ctrl} -o {output.cnts_ctrl_all} {input.bam}
         featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_ctrl_2k} -o {output.cnts_ctrl_2k} {input.bam}
 
-        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_6h} -o {output.cnts_ctrl_6h} {input.bam}
+        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_6h} -o {output.cnts_6h_all} {input.bam}
         featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_6h_2k} -o {output.cnts_6h_2k} {input.bam}
 
-        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_24h} -o {output.cnts_ctrl_24h} {input.bam}
+        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_24h} -o {output.cnts_24h_all} {input.bam}
         featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_24h_2k} -o {output.cnts_24h_2k} {input.bam}
         """
 

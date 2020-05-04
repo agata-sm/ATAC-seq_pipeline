@@ -662,7 +662,6 @@ rule subset_bam_to_genes:
         bamCoverage --normalizeUsing RPKM --exactScaling --extendReads 200 --binSize 1 --outFileFormat bigwig -p 1 --bam $TMPDIR/{wildcards.id}.subset_genes.bam --outFileName {output}
         """
 
-
 rule profile_plots_sel_genes:
     input:
         bw=expand(tempdir + "{id}.filt.subset_genes.bw", id=bam_base),#LibLabels=expand(bam_base),

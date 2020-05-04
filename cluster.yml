@@ -36,7 +36,7 @@ computeMatrix_EnsGene:
 computeMatrix_samples:
   time: "02:00:00"
   jobname: "computeMatrix_smpl"
-  N: 1
+  N: 2
 
 plotHeatmap_EnsGene:
   time: "03:00:00"

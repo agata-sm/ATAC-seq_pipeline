@@ -533,33 +533,6 @@ rule annotate_peaks_all:
         """
 
 
-rule annotate_peaks_replicates:
-    input:
-        cond1=macs2dir + "reproducible_peaks/ctrl.reproducible_peaks.bed",
-        cond2=macs2dir + "reproducible_peaks/LPS6h.reproducible_peaks.bed",
-        cond3=macs2dir + "reproducible_peaks/LPS24h.reproducible_peaks.bed"
-    output:
-        annot_peaks_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.merged.GRCm38gene.bed",
-        annot_peaks_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.merged.GRCm38gene.bed",
-        annot_peaks_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.merged.GRCm38gene.bed",
-        peaks_gtf_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf",
-        peaks_gtf_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.GRCm38gene.gtf",
-        peaks_gtf_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.GRCm38gene.gtf"
-    shell:
-        """
-        module load bioinfo-tools
-        module load BEDOPS/2.4.28
-        
-        closest-features --dist {input.cond1} {config[ensemblGene]} >{output.annot_peaks_ctrl}
-        closest-features --dist {input.cond2} {config[ensemblGene]} >{output.annot_peaks_6h}
-        closest-features --dist {input.cond3} {config[ensemblGene]} >{output.annot_peaks_24h}
-
-        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_ctrl} --outfile {output.peaks_gtf_ctrl}
-        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_6h} --outfile {output.peaks_gtf_6h}
-        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_24h} --outfile {output.peaks_gtf_24h}
-        """
-
-
 
 rule featureCounts:
     input:
@@ -588,6 +561,67 @@ rule featureCounts:
     
         featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_tss} -o {output.allpeaks_cnt_tss} {input.bam}
         featureCounts -s 0 -t atacseq_peak -g peak_id -a {input.peaks_2k_gtf_tss} -o {output.peaks_genes2k_cnt_tss} {input.bam}
+        """
+
+rule annotate_peaks_replicates:
+    input:
+        cond1=macs2dir + "reproducible_peaks/ctrl.reproducible_peaks.bed",
+        cond2=macs2dir + "reproducible_peaks/LPS6h.reproducible_peaks.bed",
+        cond3=macs2dir + "reproducible_peaks/LPS24h.reproducible_peaks.bed"
+    output:
+        annot_peaks_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.merged.GRCm38gene.bed",
+        annot_peaks_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.merged.GRCm38gene.bed",
+        annot_peaks_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.merged.GRCm38gene.bed",
+        peaks_gtf_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf",
+        peaks_gtf_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.GRCm38gene.gtf",
+        peaks_gtf_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.GRCm38gene.gtf"
+    shell:
+        """
+        module load bioinfo-tools
+        module load BEDOPS/2.4.28
+        
+        closest-features --dist {input.cond1} {config[ensemblGene]} >{output.annot_peaks_ctrl}
+        closest-features --dist {input.cond2} {config[ensemblGene]} >{output.annot_peaks_6h}
+        closest-features --dist {input.cond3} {config[ensemblGene]} >{output.annot_peaks_24h}
+
+        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_ctrl} --outfile {output.peaks_gtf_ctrl}
+        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_6h} --outfile {output.peaks_gtf_6h}
+        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_24h} --outfile {output.peaks_gtf_24h}
+        """
+
+
+
+rule featureCounts_replicates:
+    input:
+        bam=expand(filtbamdir + "{id}.filt.bam", id=bam_base),
+        peaks_gtf_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf",
+        peaks_gtf_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.GRCm38gene.gtf",
+        peaks_gtf_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.GRCm38gene.gtf", 
+        peaks_gtf_ctrl_2k=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf",
+        peaks_gtf_6h_2k=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf",
+        peaks_gtf_24h_2k=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf"
+
+    output:
+        cnts_ctrl_all=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/count_table_peaks/ctrl.count_table.allpeaks.fCounts.tab",
+        cnts_ctrl_2k=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/count_table_peaks/ctrl.count_table.2kbTSSpeaks.fCounts.tab",
+        cnts_6h_all=macs2dir + "annotated_reproducible_peaks_replicates/6h/count_table_peaks/LPS6h.count_table.allpeaks.fCounts.tab",
+        cnts_6h_2k=macs2dir + "annotated_reproducible_peaks_replicates/6h/count_table_peaks/LPS6h.count_table.2kbTSSpeaks.fCounts.tab",
+        cnts_24h_all=macs2dir + "annotated_reproducible_peaks_replicates/24h/count_table_peaks/LPS24h.count_table.allpeaks.fCounts.tab",
+        cnts_24h_2k=macs2dir + "annotated_reproducible_peaks_replicates/24h/count_table_peaks/LPS24h.count_table.2kbTSSpeaks.fCounts.tab"
+
+    shell:
+        """
+        module load bioinfo-tools
+        module load subread/2.0.0
+
+        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_ctrl} -o {output.cnts_ctrl_all} {input.bam}
+        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_ctrl_2k} -o {output.cnts_ctrl_2k} {input.bam}
+
+        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_6h} -o {output.cnts_ctrl_6h} {input.bam}
+        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_6h_2k} -o {output.cnts_6h_2k} {input.bam}
+
+        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_24h} -o {output.cnts_ctrl_24h} {input.bam}
+        featureCounts -s 0 -t atacseq_peak -g peak_id  -a {input.peaks_gtf_24h_2k} -o {output.cnts_24h_2k} {input.bam}
         """
 
 

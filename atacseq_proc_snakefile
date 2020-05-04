@@ -583,9 +583,9 @@ rule annotate_peaks_replicates:
         annot_peaks_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.merged.GRCm38gene.bed",
         annot_peaks_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.merged.GRCm38gene.bed",
         annot_peaks_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.merged.GRCm38gene.bed",
-        peaks_gtf_ctrl=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.gtf",
-        peaks_gtf_6h=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.GRCm38gene.gtf",
-        peaks_gtf_24h=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.GRCm38gene.gtf"
+        peaks_gtf_ctrl_2k=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/ctrl.reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf",
+        peaks_gtf_6h_2k=macs2dir + "annotated_reproducible_peaks_replicates/6h/LPS6h.reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf",
+        peaks_gtf_24h_2k=macs2dir + "annotated_reproducible_peaks_replicates/24h/LPS24h.reproduciblepeaks.GRCm38gene.peaks.TSS_dist_2000.gtf"
     shell:
         """
         module load bioinfo-tools

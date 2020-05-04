@@ -102,13 +102,13 @@ rule all:
         resdir + "rulegraph.png",
         log_st_stats=expand(filtbamdirstats + "{id}.filt.stats", id=bam_base),
         xcor=expand(xcordir + "{id}.xcor.metrics.txt", id=bam_base),
-        deeptoolsdir_plots + "CorrSpearman_bin5k.pdf",
-        deeptoolsdir_plots + "bamFingerprint.pdf",
+        corr_bins=deeptoolsdir_plots + "CorrSpearman_bin5k.pdf",
+        fingerprint=deeptoolsdir_plots + "bamFingerprint.pdf",
         ens_gene_1x_hm= plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf", #rule plotHeatmap_EnsGene
         ens_gene_1x_profile= plotDir_prof_1x + "profiles.ensGene.gene.cov1x.pdf", #rule plotProfile_EnsGene:
         ens_gene_1x_hm_samples=expand(plotDirInd_hm_1x + "{id}.heatmap_signal.ensGene.TSS.cov1x.k3.pdf", id=bam_base), #rule plotHeatmap_samples:
-        deeptoolsdir_plots + "CorrSpearman_peaks.pdf",
-        macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
+        corr_peaks=deeptoolsdir_plots + "CorrSpearman_peaks.pdf",
+        peaks=macs2dir + "annotated_reproducible_peaks/all.reproduciblepeaks.merged.GRCm38gene.bed",
         allpeaks_cnt_gene = macs2dir + "annotated_reproducible_peaks/selected_gene_dist/count_table_peaks/count_table.reproduciblepeaks.fCounts.tab", #rule featureCounts_reprodPeaks:
         cnts_ctrl_all=macs2dir + "annotated_reproducible_peaks_replicates/ctrl/count_table_peaks/ctrl.count_table.allpeaks.fCounts.tab", #rule featureCounts_replicates:
         out_profile_tss=visdir + "reproducible_peaks.ensgenes.rpkm.TSS.profile.pdf" #rule profile_plots_sel_genes:

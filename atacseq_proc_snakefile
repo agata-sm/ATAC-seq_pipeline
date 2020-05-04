@@ -101,7 +101,7 @@ rule all:
     input:
         resdir + "rulegraph.png",
         log_st_stats=expand(filtbamdirstats + "{id}.filt.stats", id=bam_base),
-        expand(xcordir + "{id}.xcor.metrics.txt", id=bam_base),
+        xcor=expand(xcordir + "{id}.xcor.metrics.txt", id=bam_base),
         deeptoolsdir_plots + "CorrSpearman_bin5k.pdf",
         deeptoolsdir_plots + "bamFingerprint.pdf",
         ens_gene_1x_hm= plotDir_hm_1x + "heatmap_signal.ensGene.gene.cov1x.k4.pdf", #rule plotHeatmap_EnsGene

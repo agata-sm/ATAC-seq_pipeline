@@ -540,7 +540,7 @@ rule annotate_peaks_reprodPeaks:
 
         perl src/peaks2gff_v2.2.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot} --outfile {output.peaks_gtf}
 
-        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot} --outfile {output.peaks_gtf_tss}
+        perl src/peaks2gff_v3.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot} --outfile {output.peaks_gtf_tss}
         """
 
 
@@ -598,9 +598,9 @@ rule annotate_peaks_replicates:
         closest-features --dist {input.cond2} {config[ensemblGene]} >{output.annot_peaks_6h}
         closest-features --dist {input.cond3} {config[ensemblGene]} >{output.annot_peaks_24h}
 
-        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_ctrl} --outfile {output.peaks_gtf_ctrl}
-        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_6h} --outfile {output.peaks_gtf_6h}
-        perl src/peaks2gff_v3.0.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_24h} --outfile {output.peaks_gtf_24h}
+        perl src/peaks2gff_v3.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_ctrl} --outfile {output.peaks_gtf_ctrl}
+        perl src/peaks2gff_v3.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_6h} --outfile {output.peaks_gtf_6h}
+        perl src/peaks2gff_v3.1.pl --peak_distance 2000 --gene_coord_distance 2500 --infile {output.annot_peaks_24h} --outfile {output.peaks_gtf_24h}
         """
 
 

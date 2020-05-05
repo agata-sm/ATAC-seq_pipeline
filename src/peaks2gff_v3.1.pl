@@ -22,7 +22,7 @@ use diagnostics;
 use Getopt::Long;
 use POSIX;
 
-my $script_name="peaks2gff_v3.0.pl";
+my $script_name="peaks2gff_v3.1.pl";
 
 
 if ($ARGV[0]eq qw '-h'){

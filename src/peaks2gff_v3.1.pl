@@ -141,8 +141,9 @@ else{
 
 
 		# if genes on (-) strand 5' of the peak and genes on (+) strand 3' of the peak > only these will be evaluated
-			my $TSS_dist_5=$gene5_end-$peak_midpnt;
-			my $TSS_dist_3=-($peak_midpnt-$gene3_start);
+     		 my $TSS_dist_5=$gene5_end-$peak_midpnt;
+     		 my $TSS_dist_3=$peak_midpnt-$gene3_start;
+
 
 			# select genes on (-) strand on the 5' peak side and  genes on (+) strand on the 3' side to evaluate peaks close to TSS rather than gene end
 			if ( ($gene5_strand eq qw /-/) && ($gene3_strand eq qw /+/) ) { #both genes in correct orientation to be a candidate #7317
@@ -192,7 +193,7 @@ else{
 			print OUTFILE_INFO "$peak_name\t$peak_bed[0]\t$start\t$peak_bed[2]\t$gene5_id\t$gene5_name\t$gene5_biotype\t$dist5\t$gene3_id\t$gene3_name\t$gene3_biotype\t$dist3\n";
 	
 			my $TSS_dist_5="NA";
-			my $TSS_dist_3=-($peak_midpnt-$gene3_start);
+     		my $TSS_dist_3=$peak_midpnt-$gene3_start;
 
 			if($gene3_strand eq qw /+/){
 				&get_gene($gene3,$dist3,$TSS_dist_3 ,$gtf_peaks_line1,$peak_name,$peak_midpnt,$peak_dist,$padded_dist);
@@ -223,7 +224,7 @@ else{
 
 			print OUTFILE_INFO "$peak_name\t$peak_bed[0]\t$start\t$peak_bed[2]\t$gene5_id\t$gene5_name\t$gene5_biotype\t$dist5\t$gene3_id\t$gene3_name\t$gene3_biotype\t$dist3\n";
 
-			my $TSS_dist_5=$gene5_end-$peak_midpnt;
+     		my $TSS_dist_5=$gene5_end-$peak_midpnt;
 			my $TSS_dist_3="NA";
 
 			if ($gene5_strand eq qw /-/){

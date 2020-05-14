@@ -65,6 +65,7 @@ bedops --merge $pairwise_intersect > $smpl_outfile
 
 
 unset pairwise_intersect
+unset INTersect_pairs
 
 ##### LPS 6h
 
@@ -110,6 +111,7 @@ bedops --merge $pairwise_intersect > $smpl_outfile
 
 
 unset pairwise_intersect
+unset INTersect_pairs
 
 
 ##### LPS 24h
@@ -155,6 +157,7 @@ pairwise_intersect=`echo ${INTersect_pairs[@]}`
 bedops --merge $pairwise_intersect > $smpl_outfile
 
 unset pairwise_intersect
+unset INTersect_pairs
 
 
 ### merged reproducible

@@ -427,7 +427,7 @@ rule MACS2:
         
         pth="{output.xls}"
 
-        macs2 callpeak -t {input} -f BAM -g {config[efGenomeSize]} -n ${{pth%_peaks.xls}} -q 0.05 --nomodel --extsize 300 --keep-dup all
+        macs2 callpeak -t {input} -f BAM -g {config[efGenomeSize]} -n ${{pth%_peaks.xls}} -q 0.05 --nomodel --shift -100 --extsize 200 --keep-dup all
         
         cut -f 1,2,3,4,5,6 {output.narrowPeak} > {output.tmp_bed}
 
